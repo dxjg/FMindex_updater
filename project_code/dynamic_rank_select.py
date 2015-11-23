@@ -36,7 +36,7 @@ def Node:
         return self.right
 
 
-def PartialSum:
+def DynamicRankSelect:
     def __init__(self, string):
         if (string is None):
             logging.error('No string specified.')
