@@ -9,7 +9,7 @@ import fmindex
 
 
 def main():
-    string = "ABRACADABRA"
+    string = "CTCTGC"
     fm = fmindex.createFM(string)
     print string, fm.bwt
     import pprint
@@ -21,11 +21,10 @@ def main():
         for i in range(len(fm.bwt)):
             result +=  str(fm.occ[c][i]) + ", "
         print result
+    for i in range(len(fm.bwt)):
+        print fm.sa[i], sorted(fm.bwt)[i], fm.bwt[i]
             
-    print "LF (9)"
-    print fm._lf(9)
     print "LF (5)"
-    print fm._lf(5)
 
 if __name__ == '__main__':
     main()

@@ -10,6 +10,13 @@ class FMindex(object):
         self.bwt = self._createBWT(genome)
         self.count = self._createCount()
         self.occ = self._createOcc()
+        self.sa = self._createSA(genome)
+
+    def _lf(self, index):
+        C = self.count[self.bwt[index-1]]
+        Occ = self.occ[self.bwt[index-1]][index-1]
+        print C, Occ, self.bwt[C + Occ - 1]
+        return C + Occ - 1
 
     def _createBWM(self, t):
         return sorted([t[i:] + t[:i] for i in range(len(t))])
@@ -17,6 +24,17 @@ class FMindex(object):
     def _createBWT(self, genome):
         L = [row[-1] for row in self._createBWM(genome)]
         return "".join(L)
+
+    def _createSA(self, t):
+        bwm = self._createBWM(t)
+        unsorted = [t[i:] for i in range(len(t))]
+        indexSA = {}
+        sa = []
+        for i, row in enumerate(unsorted):
+            indexSA[row] = i
+        for row in sorted(indexSA.keys()):
+            sa.append(indexSA[row])
+        return sa
 
     #from the python fmindex github. TODO link here
     def _createCount(self):
@@ -36,7 +54,7 @@ class FMindex(object):
         del A
         return B
 
-    '''A sigma by len(bwt) table  '''
+    '''A Sigma-by-len(bwt) table'''
     def _createOcc(self):
         table = {}
         for c in sorted(self.count.keys()):
@@ -51,15 +69,21 @@ class FMindex(object):
                     table[i][j] = prev
 
         return table
+    #TODO Python strings are immutable, can't pop/insert. Instead we need to maybe 
+    #make a new string that combines two halves of the original plus the moved character
+    def _move(self, j, j_prime):
+        self.bwt.insert(j_prime, bwt[j])
+        if j < j_prime:
+            bwt.pop([j])
+        elif j > j_prime:
+            bwt.pop([j+1])
+        return 
 
-
-    def _lf(self, index):
-        C = self.count[self.bwt[index-1]]
-        Occ = self.occ[self.bwt[index-1]][index-1]
-        print C, Occ, self.bwt[C + Occ - 1]
-        return C + Occ - 1
-
-        
+    '''Stage Ib. Given the insertion index i and the character to insert c,
+       Insert c into the bwt at i, overwriting the character there'''
+    def _insertIntoBWT(self, i, c):
+        print 0
+        #TODO this
         
 
         
