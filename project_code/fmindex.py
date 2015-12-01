@@ -13,10 +13,19 @@ class FMindex(object):
         self.sa = self._createSA(genome)
 
     def _lf(self, index):
-        C = self.count[self.bwt[index-1]]
-        Occ = self.occ[self.bwt[index-1]][index-1]
-        print C, Occ, self.bwt[C + Occ - 1]
+        C = self.count[self.bwt[index]]
+        Occ = self.occ[self.bwt[index]][index]
         return C + Occ - 1
+
+    def _insertIntoBWT(self, i, c):
+        overwritten, k = self._stageIb(i, c)
+        self._stageIIa(overwritten, i)
+        self._stageIIb(i, k)
+
+    #Find the row corresponding to the ith rotation
+    def _index(self, i):
+        return self.sa.index(i)
+
 
     def _createBWM(self, t):
         return sorted([t[i:] + t[:i] for i in range(len(t))])
@@ -35,6 +44,13 @@ class FMindex(object):
         for row in sorted(indexSA.keys()):
             sa.append(indexSA[row])
         return sa
+    
+    #See paper on dynamic suffix arrays for this algorithm
+    def _updateSA(self, k_prime, i):
+        for j in range(len(self.sa)):
+            if self.sa[j] >= i:
+                self.sa[j] += 1
+        self.sa.insert(k_prime, i)
 
     #from the python fmindex github. TODO link here
     def _createCount(self):
@@ -67,23 +83,65 @@ class FMindex(object):
                     prev += 1
                 else:
                     table[i][j] = prev
-
         return table
-    #TODO Python strings are immutable, can't pop/insert. Instead we need to maybe 
-    #make a new string that combines two halves of the original plus the moved character
+
     def _move(self, j, j_prime):
-        self.bwt.insert(j_prime, bwt[j])
         if j < j_prime:
-            bwt.pop([j])
+            print self.bwt[:j], self.bwt[j+1:j_prime+1], self.bwt[j], self.bwt[j_prime + 1:]
+            temp = self.bwt[:j] + self.bwt[j+1:j_prime + 1] + self.bwt[j] + self.bwt[j_prime + 1:]
         elif j > j_prime:
-            bwt.pop([j+1])
+            print self.bwt[:j_prime], self.bwt[j], self.bwt[j_prime:j], self.bwt[j:]
+            temp = self.bwt[:j_prime] + self.bwt[j] + self.bwt[j_prime:j] + self.bwt[j:]
+        self.bwt = temp
+        tempSA = self.sa.pop(j)
+        self.sa.insert(j_prime, tempSA)
         return 
 
     '''Stage Ib. Given the insertion index i and the character to insert c,
        Insert c into the bwt at i, overwriting the character there'''
-    def _insertIntoBWT(self, i, c):
-        print 0
-        #TODO this
+    def _stageIb(self, i, c):
+        #TODO right now count is rebuilt entirely (time consuming)
+        #Waiting on implementing navarro
+        k = self.sa.index(i)
+        overwritten = self.bwt[k]
+        overwritten_k = self._lf(k)
+        print k, overwritten_k
+        self.bwt = self.bwt[:k] + c + self.bwt[k+1:]
+        print "After stage Ib:"
+        self._printBWT()
+        return overwritten, overwritten_k
+
+    def _stageIIa(self, overwritten, i):
+        k = self.sa.index(i)
+        insertPoint = self._lf(k) + 1
+        print "inserting T at row ", insertPoint, i, k
+        temp = self.bwt[:insertPoint] + overwritten + self.bwt[insertPoint:]
+        self.bwt = temp
+        print "After stage IIa", self.bwt, len(self.bwt)
+        self._printBWT()
+        self.count = self._createCount()
+        print self.count
+        self._updateSA(insertPoint, i)
+        self.occ = self._createOcc()
+
+    def _stageIIb(self, i, k):
+        j = k + 1
+        j_prime = self._lf(k)
+        while j!= j_prime:
+            print "j= ", j, ", j' = ", j_prime
+            new_j = self._lf(j)
+            self._move(j, j_prime)
+            print "One loop of Stage IIb", self.bwt
+            j = new_j
+            j_prime = self._lf(j_prime)
+        print "After Stage IIb"
+        self._printBWT()
+
+        
+    def _printBWT(self):
+        for i in range(len(self.bwt)):
+            print self.bwt[i]
+
         
 
         

@@ -21,10 +21,11 @@ def main():
         for i in range(len(fm.bwt)):
             result +=  str(fm.occ[c][i]) + ", "
         print result
+    print "suffix array indexes"
     for i in range(len(fm.bwt)):
         print fm.sa[i], sorted(fm.bwt)[i], fm.bwt[i]
-            
-    print "LF (5)"
+    fm._insertIntoBWT(2, "G")        
+    
 
 if __name__ == '__main__':
     main()
