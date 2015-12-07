@@ -31,11 +31,15 @@ class DynamicBitVector:
 
 class Node:
     ''' A Node contains: 1) parent 2) left child 3) right child 4) DynamicBitVector '''
-    def __init__(self, bit_vector, left=None, right=None, parent=None):
+    def __init__(self, alphabet, sequence, left=None, right=None, parent=None):
+        self._alphabet = alphabet
         self._bit_vector = DynamicBitVector(bit_vector)
         self._left = left
         self._right = right
         self._parent = parent
+
+    def get_alphabet():
+        return self._alphabet
 
     def get_bit_vector(self):
         return self._bit_vector
@@ -52,10 +56,22 @@ class Node:
 
 class DynamicWaveletTree:
     ''' __init__ creates the wavelet tree; the other methods are rank, select, insert, delete '''
+    def split_node(self, node, sequence):
+        left, right = '', ''
+        alphabet, bit_vector = node.get_alphabet(), node.get_bit_vector()
+        split = len(alphabet)/2
+        if split == 0:
+            return None
+        for i in xrange(0, len(sequence)):
+            if bit_vector[i] == 0:
+                left += sequence[i]
+            else: right += sequence[i]
+
+
     def create_tree(self, sequence):
-        return None
 
     def __init__(self, sequence):
+        self._head =
         return None
 
     def rank(self, character, index):
