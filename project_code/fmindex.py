@@ -18,9 +18,17 @@ class FMindex(object):
         return C + Occ - 1
 
     def insBase(self, i, c):
+        print "Original"
+        self.printBWT()
         overwritten, k = self.ins_stageIb(i, c)
+        print "After stageIb"
+        self.printBWT()
         self.ins_stageIIa(overwritten, k, i)
+        print "After stageIIa"
+        self.printBWT()
         self.ins_stageIIb(i, k)
+        print "After stageIIb"
+        self.printBWT()
 
     def delBase(self, i):
         k = self.del_stageIb(i)
@@ -29,8 +37,10 @@ class FMindex(object):
 
     def printBWT(self):
         for i in range(len(self.bwt)):
-            print self.bwt[i]
-
+            if i == len(self.sa):
+                print " ", sorted(self.bwt)[i], self.bwt[i]
+            else:
+                print self.sa[i], sorted(self.bwt)[i], self.bwt[i]
 
 ################################################################################
 #                           "Private" Methods Below                            #
@@ -133,26 +143,20 @@ class FMindex(object):
         k = self.sa.index(i)
         overwritten = self.bwt[k]
         overwritten_k = self._lf(k)
-        print "INS: Beginning stage Ib"
         print "INS: Overwritten index:", k, "; LF of Overwritten index:", overwritten_k
         self.bwt = self.bwt[:k] + c + self.bwt[k+1:]
-        print "INS: After stage Ib:", self.bwt
-        self.count = self._createCount()
-        self.occ = self._createOcc()
         return overwritten, overwritten_k
 
     def ins_stageIIa(self, overwritten, k, i): 
         print "inserting T at row:", k
         temp = self.bwt[:k] + overwritten + self.bwt[k:]
         self.bwt = temp
-        print "INS: After stage IIa", self.bwt
         self.count = self._createCount()
-        print self.count
         self._updateSA(k, i)
         self.occ = self._createOcc()
 
     def ins_stageIIb(self, i, k):
-        j = self.sa.index(i-1)
+        j = self._lf(self.sa.index(i))
         j_prime = self._lf(k)
         while j!= j_prime:
             print "INS: j= ", j, ", j' = ", j_prime
@@ -162,7 +166,6 @@ class FMindex(object):
             j = new_j
             j_prime = self._lf(j_prime)
             print j, j_prime
-        print "INS: After Stage IIb", self.bwt
 
 
 ####################################################################################
@@ -202,7 +205,6 @@ class FMindex(object):
         print "DEL: After stage IIa", self.bwt, len(self.bwt)
         self.printBWT()
         self.count = self._createCount()
-        print self.count
         self._updateSA(deletionPoint, i)
         self.occ = self._createOcc()
 

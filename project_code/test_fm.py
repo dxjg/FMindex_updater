@@ -14,17 +14,28 @@ def main():
     if '$' in string:
         print "Don't include $ in genome"
         sys.exit(0)
-    fm = fmindex.createFM(string)
     import pprint
-    index = int(sys.argv[2])
-    insert = sys.argv[3]
-    print "Before", fm.bwt
-    afterString = string[:index] + insert + string[index:]
-    afterfm = fmindex.FMindex(afterString)
-    testIns(fm, index, insert)
-    print "Expected result:", afterfm.bwt
-    print "Actual results: ", fm.bwt
-    #testDel(fm, index)
+    numCorrect = 0
+    numTotal = 0
+    for c in "ACGT":
+        for i in range(len(string)):
+            fm = fmindex.createFM(string)
+            print "\nTesting i =", i, ", c =,", c
+            print "Before: T =", string +'$ ', "BWT =", fm.bwt
+            afterString = string[:i] + c + string[i:]
+            afterfm = fmindex.FMindex(afterString)
+            print "After: T'= ", afterString + '$', "BWT'=", afterfm.bwt
+            testIns(fm, i, c)
+            #testDel(fm, index)
+            if afterfm.bwt == fm.bwt:
+                numCorrect += 1
+            numTotal += 1
+            print "Expected result:", afterfm.bwt
+            print "Actual results: ", fm.bwt
+            del fm
+    print numTotal - numCorrect, "are wrong" 
+
+    
 
 def testIns(fm, index, insert):
     print "Inserting", insert, "at index", index
