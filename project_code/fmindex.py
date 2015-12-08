@@ -10,37 +10,40 @@ class FMindex(object):
         self.bwt = self._createBWT(genome)
         self.count = self._createCount()
         self.occ = self._createOcc()
-        self.sa = self._createSA(genome)
+        self.sa, self.isa = self._createSA(genome)
 
     def _lf(self, index):
         C = self.count[self.bwt[index]]
+        
         Occ = self.occ[self.bwt[index]][index]
+        print "LF(", index, ") =", C, "+", Occ, - 1, "=", C + Occ - 1
         return C + Occ - 1
 
     def insBase(self, i, c):
         print "Original"
         self.printBWT()
-        overwritten, k = self.ins_stageIb(i, c)
+        overwritten, lf_k = self.ins_stageIb(i, c)
         print "After stageIb"
         self.printBWT()
-        self.ins_stageIIa(overwritten, k, i)
+        self.ins_stageIIa(overwritten, lf_k, i)
         print "After stageIIa"
         self.printBWT()
-        self.ins_stageIIb(i, k)
+        self.ins_stageIIb(i, lf_k)
         print "After stageIIb"
         self.printBWT()
 
     def delBase(self, i):
-        k = self.del_stageIb(i)
-        self.del_stageIIa(i)
-        self.del_stageIIb(i, k)
+        lf_k = self.del_stageIb(i)
+        self.del_stageIIa(i, lf_k)
+        self.del_stageIIb(i, lf_k)
 
     def printBWT(self):
+        print 'S', 'I', 'F', 'L'
         for i in range(len(self.bwt)):
-            if i == len(self.sa):
-                print " ", sorted(self.bwt)[i], self.bwt[i]
+            if i >= len(self.sa):
+                print " ", " ", sorted(self.bwt)[i], self.bwt[i]
             else:
-                print self.sa[i], sorted(self.bwt)[i], self.bwt[i]
+                print self.sa[i], self.isa[i], sorted(self.bwt)[i], self.bwt[i]
 
 ################################################################################
 #                           "Private" Methods Below                            #
@@ -59,28 +62,29 @@ class FMindex(object):
         unsorted = [t[i:] for i in range(len(t))]
         indexSA = {}
         sa = []
+        isa = []
         for i, row in enumerate(unsorted):
             indexSA[row] = i
         for row in sorted(indexSA.keys()):
             sa.append(indexSA[row])
-        return sa
+        for i in range(len(sa)):
+            isa.append(sa.index(i))
+        return sa, isa
     
     #Find the row corresponding to the ith rotation
     def _index(self, i):
-        return self.sa.index(i)
+        return self.isa[i]
 
     #See paper on dynamic suffix arrays for this algorithm
     def _updateSA(self, k_prime, i):
-        if len(self.sa) < len(self.bwt):
-            for j in range(len(self.sa)):
-                if self.sa[j] >= i:
-                    self.sa[j] += 1
-            self.sa.insert(k_prime, i)
-        else:
-            for j in range(len(self.sa)):
-                if self.sa[j] >= i:
-                    self.sa[j] -= 1
-            del self.sa[k_prime]
+        for j in range(len(self.sa)):
+            if self.sa[j] >= i:
+                self.sa[j] += 1
+        self.sa.insert(k_prime, i)
+        for j in range(len(self.isa)):
+            if self.isa[j] >= k_prime:
+                self.isa[j] += 1
+        self.isa.insert(i, k_prime)
 
 
     #from the python fmindex github. TODO link here
@@ -119,17 +123,34 @@ class FMindex(object):
     #Part of insBase, subBase, and delBase
     def _move(self, j, j_prime):
         if j < j_prime:
-            print self.bwt[:j], self.bwt[j+1:j_prime+1], self.bwt[j], self.bwt[j_prime + 1:]
-            temp = self.bwt[:j] + self.bwt[j+1:j_prime + 1] + self.bwt[j] + self.bwt[j_prime + 1:]
-        elif j > j_prime:
-            print self.bwt[:j_prime], self.bwt[j], self.bwt[j_prime:j], self.bwt[j:]
-            temp = self.bwt[:j_prime] + self.bwt[j] + self.bwt[j_prime:j] + self.bwt[j:]
-        self.bwt = temp
+            print "j < j'"
+            self.bwt = self.bwt[:j] + self.bwt[j+1:j_prime + 1] + self.bwt[j] + self.bwt[j_prime + 1:]
+            #Updating SA
+            temp = self.sa[j]
+            self.sa[j] = self.sa[j_prime]
+            self.sa[j_prime] = temp
+            #Updating ISA
+            for value in range(j + 1, j_prime + 1):
+                print "ISA with value", value, "is at index", self.isa.index(value)
+                index = self.isa.index(value)
+                self.isa[index] -= 1
+            self.isa[self.isa.index(j)] = j_prime
+        else: #j > j_prime:
+            print "j > j'"
+            self.bwt = self.bwt[:j_prime] + self.bwt[j] + self.bwt[j_prime:j] + self.bwt[j+1:]
+            #Updating SA
+            temp = self.sa[j]
+            self.sa[j] = self.sa[j_prime]
+            self.sa[j_prime] = temp
+            #Updating ISA
+            for value in range(j_prime, j):
+                print "ISA with value", value, "is at index", self.isa.index(value)
+                index = self.isa.index(value)
+                self.isa[index] += 1
+            self.isa[self.isa.index(j)] = j_prime
         print "Moving rows" , j, j_prime
-        tempSA = self.sa.pop(j)
-        print self.sa, tempSA
-        self.sa.insert(j_prime, tempSA)
         return 
+
 
 ####################################################################################
 #                              Insertion of 1 element                              #
@@ -140,32 +161,35 @@ class FMindex(object):
     def ins_stageIb(self, i, c):
         #TODO right now count is rebuilt entirely (time consuming)
         #Waiting on implementing navarro
-        k = self.sa.index(i)
+        k = self._index(i)
         overwritten = self.bwt[k]
-        overwritten_k = self._lf(k)
-        print "INS: Overwritten index:", k, "; LF of Overwritten index:", overwritten_k
+        lf_k = self._lf(k)
+        print "INS: Overwritten index:", k, "; LF of Overwritten index:", lf_k
         self.bwt = self.bwt[:k] + c + self.bwt[k+1:]
-        return overwritten, overwritten_k
+        return overwritten, lf_k
 
-    def ins_stageIIa(self, overwritten, k, i): 
-        print "inserting T at row:", k
-        temp = self.bwt[:k] + overwritten + self.bwt[k:]
-        self.bwt = temp
+    def ins_stageIIa(self, overwritten, lf_k, i): 
+        print "inserting", overwritten, "at row:", lf_k
+        self.bwt = self.bwt[:lf_k] + overwritten + self.bwt[lf_k:]
         self.count = self._createCount()
-        self._updateSA(k, i)
+        self._updateSA(lf_k, i)
         self.occ = self._createOcc()
 
-    def ins_stageIIb(self, i, k):
-        j = self._lf(self.sa.index(i))
-        j_prime = self._lf(k)
-        while j!= j_prime:
-            print "INS: j= ", j, ", j' = ", j_prime
+    def ins_stageIIb(self, i, lf_k):
+        j = lf_k + 1
+        j_prime = self._lf(lf_k)
+        print "INS: j= ", j, ", j' = ", j_prime
+        while j != j_prime | j_prime != -1:
             new_j = self._lf(j)
             self._move(j, j_prime)
+            self.count = self._createCount()
+            self.occ = self._createOcc()
             print "INS: Loop of Stage IIb", self.bwt
+            self.printBWT()
             j = new_j
             j_prime = self._lf(j_prime)
-            print j, j_prime
+            print "INS: j= ", j, ", j' = ", j_prime
+            
 
 
 ####################################################################################

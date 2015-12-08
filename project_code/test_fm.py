@@ -14,7 +14,6 @@ def main():
     if '$' in string:
         print "Don't include $ in genome"
         sys.exit(0)
-    import pprint
     numCorrect = 0
     numTotal = 0
     for c in "ACGT":
@@ -25,13 +24,22 @@ def main():
             afterString = string[:i] + c + string[i:]
             afterfm = fmindex.FMindex(afterString)
             print "After: T'= ", afterString + '$', "BWT'=", afterfm.bwt
-            testIns(fm, i, c)
+            fm = testIns(fm, i, c)
             #testDel(fm, index)
             if afterfm.bwt == fm.bwt:
+                print "SUCCEEDED"
                 numCorrect += 1
+            else:
+                print "FAILED"
+                print "Correct result:", afterfm.bwt
+                print "Actual results:", fm.bwt
+                print " Actual | Correct"
+                for j in range(len(afterfm.bwt)):
+                    if j >= len(fm.bwt):
+                        print " ", " ", " ", " ", "|", afterfm.sa[j], afterfm.isa[j], sorted(afterfm.bwt)[j], afterfm.bwt[j]
+                    else:
+                        print fm.sa[j], fm.isa[j], sorted(fm.bwt)[j], fm.bwt[j], "|", afterfm.sa[j], afterfm.isa[j], sorted(afterfm.bwt)[j], afterfm.bwt[j]
             numTotal += 1
-            print "Expected result:", afterfm.bwt
-            print "Actual results: ", fm.bwt
             del fm
     print numTotal - numCorrect, "are wrong" 
 
@@ -40,19 +48,13 @@ def main():
 def testIns(fm, index, insert):
     print "Inserting", insert, "at index", index
     before = fm.bwt
-    fm.insBase(index, insert)        
-    print "After insertion"
-    after = fm.bwt
-    for i in range(len(fm.bwt)):
-        print fm.sa[i], sorted(fm.bwt)[i], fm.bwt[i]
+    fm.insBase(index, insert)
+    return fm
 
 def testDel(fm, index):
     print "Deleting 'G' from index 2" 
     print fm.bwt
     fm.delBase(index)
-    print "After deletion"
-    for i in range(len(fm.bwt)):
-        print fm.sa[i], sorted(fm.bwt)[i], fm.bwt[i]
 
 if __name__ == '__main__':
     main()
