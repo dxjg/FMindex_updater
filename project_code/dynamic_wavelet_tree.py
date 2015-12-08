@@ -11,7 +11,16 @@ class DynamicBitVector:
                 count += 1
         return count
 
-    def select(self, occurrence):
+    def select_0(self, occurrence):
+        count = 0
+        for i in xrange(0, len(self._bit_vector)):
+            if self._bit_vector[i] == '0':
+                count += 1
+            if count == occurrence:
+                return i
+        return (len(self._bit_vector)-1)
+
+    def select_1(self, occurrence):
         count = 0
         for i in xrange(0, len(self._bit_vector)):
             if self._bit_vector[i] == '1':
@@ -30,7 +39,6 @@ class DynamicBitVector:
         return self._bit_vector
 
 class Node:
-    ''' A Node contains: 1) parent 2) left child 3) right child 4) DynamicBitVector '''
     def __init__(self, alphabet, sequence, parent=None, left=None, right=None):
         self._alphabet = alphabet
         self._left = left
@@ -93,9 +101,6 @@ class Node:
     def get_parent(self):
         return self._parent
 
-
-
-
 class DynamicWaveletTree:
     @staticmethod
     def _create_wavelet_tree(node, sequence):
@@ -120,6 +125,19 @@ class DynamicWaveletTree:
             new_index = node.rank(index)
             return DynamicWaveletTree._rank(node.get_right(), character, new_index)
 
+    @staticmethod
+    def _select(node, occurrence):
+        parent = node.get_parent()
+        print node.get_bit_vector().get_bit_vector()
+        if parent.get_left() == node:
+            index = parent.get_bit_vector().select_0(occurrence) + 1
+        else:
+            index = parent.get_bit_vector().select_1(occurrence) + 1
+        if parent.get_parent() is None:
+            return index
+        else:
+            return DynamicWaveletTree._select(parent, index)
+
     def __init__(self, sequence):
         self._head = Node('$ACGT', sequence)
         DynamicWaveletTree._create_wavelet_tree(self._head, sequence)
@@ -128,8 +146,18 @@ class DynamicWaveletTree:
     def rank(self, character, index):
         return DynamicWaveletTree._rank(self._head, character, index)
 
-    def select(self, character, occurence):
-        return None
+    def select(self, character, occurrence):
+        node = self._head
+        while True:
+            alphabet = node.get_alphabet()
+            if len(alphabet) == 1:
+                break
+            split = len(alphabet)/2
+            if alphabet.index(character) < split:
+                node = node.get_left()
+            else:
+                node = node.get_right()
+        return DynamicWaveletTree._select(node, occurrence) - 1
 
     def insert(self, character, index):
         return None
