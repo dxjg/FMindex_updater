@@ -21,21 +21,55 @@ class FMindex(object):
 
     def insBase(self, i, c):
         print "Original"
+        self.printOcc()
         self.printBWT()
         overwritten, lf_k = self.ins_stageIb(i, c)
         print "After stageIb"
+        self.printOcc()
         self.printBWT()
         self.ins_stageIIa(overwritten, lf_k, i)
         print "After stageIIa"
+        self.printOcc()
         self.printBWT()
         self.ins_stageIIb(i, lf_k)
         print "After stageIIb"
+        self.printOcc()
         self.printBWT()
 
     def delBase(self, i):
         lf_k = self.del_stageIb(i)
         self.del_stageIIa(i, lf_k)
         self.del_stageIIb(i, lf_k)
+
+    def printOcc(self):
+        bwt = list()
+        bwt.append("_|")
+        btm = list()
+        btm.append("--")
+        for i in range(len(self.bwt)):
+            bwt.append(self.bwt[i])
+            bwt.append("|")
+            btm.append("--")
+        print ''.join(btm)
+        print ''.join(bwt)
+        for letter in sorted(self.count.keys()):
+            sum = 0
+            result = list()
+            result.append(letter)
+            result.append("|")
+            for i in range(len(self.bwt)):
+                if letter == self.bwt[i]:
+                    result.append(str(sum + 1))
+                    result.append("|")
+                    sum += 1
+                else:
+                    result.append(str(sum))
+                    result.append("|")
+            result[len(result)-1] = result[len(result)-1][-1:]
+            print ''.join(result) 
+        print ''.join(btm)
+                    
+
 
     def printBWT(self):
         print 'S', 'I', 'F', 'L'
@@ -44,6 +78,8 @@ class FMindex(object):
                 print " ", " ", sorted(self.bwt)[i], self.bwt[i]
             else:
                 print self.sa[i], self.isa[i], sorted(self.bwt)[i], self.bwt[i]
+
+       
 
 ################################################################################
 #                           "Private" Methods Below                            #
@@ -131,8 +167,8 @@ class FMindex(object):
             self.sa[j_prime] = temp
             #Updating ISA
             for value in range(j + 1, j_prime + 1):
-                print "ISA with value", value, "is at index", self.isa.index(value)
                 index = self.isa.index(value)
+                print "Decrementing row:", index
                 self.isa[index] -= 1
             self.isa[self.isa.index(j)] = j_prime
         else: #j > j_prime:
@@ -144,8 +180,8 @@ class FMindex(object):
             self.sa[j_prime] = temp
             #Updating ISA
             for value in range(j_prime, j):
-                print "ISA with value", value, "is at index", self.isa.index(value)
                 index = self.isa.index(value)
+                print "Incrementing row:", index
                 self.isa[index] += 1
             self.isa[self.isa.index(j)] = j_prime
         print "Moving rows" , j, j_prime
@@ -164,31 +200,31 @@ class FMindex(object):
         k = self._index(i)
         overwritten = self.bwt[k]
         lf_k = self._lf(k)
-        print "INS: Overwritten index:", k, "; LF of Overwritten index:", lf_k
         self.bwt = self.bwt[:k] + c + self.bwt[k+1:]
+        print "INS: k=", k, "; LF(k)=:", lf_k
         return overwritten, lf_k
 
     def ins_stageIIa(self, overwritten, lf_k, i): 
         print "inserting", overwritten, "at row:", lf_k
         self.bwt = self.bwt[:lf_k] + overwritten + self.bwt[lf_k:]
         self.count = self._createCount()
-        self._updateSA(lf_k, i)
         self.occ = self._createOcc()
+        self._updateSA(lf_k, i)
 
     def ins_stageIIb(self, i, lf_k):
         j = lf_k + 1
         j_prime = self._lf(lf_k)
-        print "INS: j= ", j, ", j' = ", j_prime
+        print "j= ", j, ", j' = ", j_prime
         while j != j_prime | j_prime != -1:
             new_j = self._lf(j)
             self._move(j, j_prime)
-            self.count = self._createCount()
-            self.occ = self._createOcc()
-            print "INS: Loop of Stage IIb", self.bwt
+            print "Loop of Stage IIb", self.bwt
             self.printBWT()
             j = new_j
+            self.count = self._createCount()
+            self.occ = self._createOcc()
             j_prime = self._lf(j_prime)
-            print "INS: j= ", j, ", j' = ", j_prime
+            print "j= ", j, ", j' = ", j_prime
             
 
 

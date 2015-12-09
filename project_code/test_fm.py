@@ -17,9 +17,10 @@ def main():
     numCorrect = 0
     numTotal = 0
     for c in "ACGT":
-        for i in range(len(string)):
+        for i in range(len(string)+1):
             fm = fmindex.createFM(string)
-            print "\nTesting i =", i, ", c =,", c
+            print "\n===================================================="
+            print "Testing i =", i, ", c =,", c
             print "Before: T =", string +'$ ', "BWT =", fm.bwt
             afterString = string[:i] + c + string[i:]
             afterfm = fmindex.FMindex(afterString)
@@ -35,15 +36,17 @@ def main():
                 print "Actual results:", fm.bwt
                 print " Actual | Correct"
                 for j in range(len(afterfm.bwt)):
+                    correctResults=' '.join([str(afterfm.sa[j]),str(afterfm.isa[j]), sorted(afterfm.bwt)[j], afterfm.bwt[j]])
                     if j >= len(fm.bwt):
-                        print " ", " ", " ", " ", "|", afterfm.sa[j], afterfm.isa[j], sorted(afterfm.bwt)[j], afterfm.bwt[j]
+                        actualResults = "         |"
                     else:
-                        print fm.sa[j], fm.isa[j], sorted(fm.bwt)[j], fm.bwt[j], "|", afterfm.sa[j], afterfm.isa[j], sorted(afterfm.bwt)[j], afterfm.bwt[j]
+                        actualResults=' '.join([str(fm.sa[j]),str(fm.isa[j]),sorted(fm.bwt)[j],fm.bwt[j], "|"])
+                    print actualResults, correctResults
             numTotal += 1
             del fm
-    print numTotal - numCorrect, "are wrong" 
+    print numTotal - numCorrect, "are wrong.", numCorrect, "are correct." 
 
-    
+ 
 
 def testIns(fm, index, insert):
     print "Inserting", insert, "at index", index
