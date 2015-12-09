@@ -1,0 +1,514 @@
+
+====================================================
+Testing i = 0 , c =, A
+Before: T = A$  BWT = A$
+After: T'=  AA$ BWT'= AA$
+Inserting A at index 0
+Original
+------
+_|A|$|
+$|0|1|
+A|1|1|
+------
+S I F L
+1 1 $ A
+0 0 A $
+LF( 1 ) = 0 + 1 -1 = 0
+INS: k= 1 ; LF(k)=: 0
+After stageIb
+------
+_|A|A|
+$|0|0|
+A|1|2|
+------
+S I F L
+1 1 A A
+0 0 A A
+inserting $ at row: 0
+After stageIIa
+--------
+_|$|A|A|
+$|1|1|1|
+A|0|1|2|
+--------
+S I F L
+0 0 $ $
+2 2 A A
+1 1 A A
+LF( 0 ) = 0 + 1 -1 = 0
+j=  1 , j' =  0
+LF( 1 ) = 1 + 1 -1 = 1
+j > j'
+Incrementing row: 0
+Moving rows 1 0
+Loop of Stage IIb A$A
+S I F L
+2 0 $ A
+0 2 A $
+1 1 A A
+LF( 0 ) = 1 + 1 -1 = 1
+j=  1 , j' =  1
+After stageIIb
+--------
+_|A|$|A|
+$|0|1|1|
+A|1|1|2|
+--------
+S I F L
+2 0 $ A
+0 2 A $
+1 1 A A
+FAILED
+Correct result: AA$
+Actual results: A$A
+ Actual | Correct
+2 0 $ A | 2 2 $ A
+0 2 A $ | 1 1 A A
+1 1 A A | 0 0 A $
+
+====================================================
+Testing i = 1 , c =, A
+Before: T = A$  BWT = A$
+After: T'=  AA$ BWT'= AA$
+Inserting A at index 1
+Original
+------
+_|A|$|
+$|0|1|
+A|1|1|
+------
+S I F L
+1 1 $ A
+0 0 A $
+LF( 0 ) = 1 + 1 -1 = 1
+INS: k= 0 ; LF(k)=: 1
+After stageIb
+------
+_|A|$|
+$|0|1|
+A|1|1|
+------
+S I F L
+1 1 $ A
+0 0 A $
+inserting A at row: 1
+After stageIIa
+--------
+_|A|A|$|
+$|0|0|1|
+A|1|2|2|
+--------
+S I F L
+2 2 $ A
+1 1 A A
+0 0 A $
+LF( 1 ) = 1 + 2 -1 = 2
+j=  2 , j' =  2
+After stageIIb
+--------
+_|A|A|$|
+$|0|0|1|
+A|1|2|2|
+--------
+S I F L
+2 2 $ A
+1 1 A A
+0 0 A $
+SUCCEEDED
+
+====================================================
+Testing i = 0 , c =, C
+Before: T = A$  BWT = A$
+After: T'=  CA$ BWT'= AC$
+Inserting C at index 0
+Original
+------
+_|A|$|
+$|0|1|
+A|1|1|
+------
+S I F L
+1 1 $ A
+0 0 A $
+LF( 1 ) = 0 + 1 -1 = 0
+INS: k= 1 ; LF(k)=: 0
+After stageIb
+------
+_|A|C|
+$|0|0|
+A|1|1|
+------
+S I F L
+1 1 A A
+0 0 C C
+inserting $ at row: 0
+After stageIIa
+--------
+_|$|A|C|
+$|1|1|1|
+A|0|1|1|
+C|0|0|1|
+--------
+S I F L
+0 0 $ $
+2 2 A A
+1 1 C C
+LF( 0 ) = 0 + 1 -1 = 0
+j=  1 , j' =  0
+LF( 1 ) = 1 + 1 -1 = 1
+j > j'
+Incrementing row: 0
+Moving rows 1 0
+Loop of Stage IIb A$C
+S I F L
+2 0 $ A
+0 2 A $
+1 1 C C
+LF( 0 ) = 1 + 1 -1 = 1
+j=  1 , j' =  1
+After stageIIb
+--------
+_|A|$|C|
+$|0|1|1|
+A|1|1|1|
+C|0|0|1|
+--------
+S I F L
+2 0 $ A
+0 2 A $
+1 1 C C
+FAILED
+Correct result: AC$
+Actual results: A$C
+ Actual | Correct
+2 0 $ A | 2 2 $ A
+0 2 A $ | 1 1 A C
+1 1 C C | 0 0 C $
+
+====================================================
+Testing i = 1 , c =, C
+Before: T = A$  BWT = A$
+After: T'=  AC$ BWT'= C$A
+Inserting C at index 1
+Original
+------
+_|A|$|
+$|0|1|
+A|1|1|
+------
+S I F L
+1 1 $ A
+0 0 A $
+LF( 0 ) = 1 + 1 -1 = 1
+INS: k= 0 ; LF(k)=: 1
+After stageIb
+------
+_|C|$|
+$|0|1|
+A|0|0|
+------
+S I F L
+1 1 $ C
+0 0 C $
+inserting A at row: 1
+After stageIIa
+--------
+_|C|A|$|
+$|0|0|1|
+A|0|1|1|
+C|1|1|1|
+--------
+S I F L
+2 2 $ C
+1 1 A A
+0 0 C $
+LF( 1 ) = 1 + 1 -1 = 1
+j=  2 , j' =  1
+LF( 2 ) = 0 + 1 -1 = 0
+j > j'
+Incrementing row: 1
+Moving rows 2 1
+Loop of Stage IIb C$A
+S I F L
+2 1 $ C
+0 2 A $
+1 0 C A
+LF( 1 ) = 0 + 1 -1 = 0
+j=  0 , j' =  0
+After stageIIb
+--------
+_|C|$|A|
+$|0|1|1|
+A|0|0|1|
+C|1|1|1|
+--------
+S I F L
+2 1 $ C
+0 2 A $
+1 0 C A
+SUCCEEDED
+
+====================================================
+Testing i = 0 , c =, G
+Before: T = A$  BWT = A$
+After: T'=  GA$ BWT'= AG$
+Inserting G at index 0
+Original
+------
+_|A|$|
+$|0|1|
+A|1|1|
+------
+S I F L
+1 1 $ A
+0 0 A $
+LF( 1 ) = 0 + 1 -1 = 0
+INS: k= 1 ; LF(k)=: 0
+After stageIb
+------
+_|A|G|
+$|0|0|
+A|1|1|
+------
+S I F L
+1 1 A A
+0 0 G G
+inserting $ at row: 0
+After stageIIa
+--------
+_|$|A|G|
+$|1|1|1|
+A|0|1|1|
+G|0|0|1|
+--------
+S I F L
+0 0 $ $
+2 2 A A
+1 1 G G
+LF( 0 ) = 0 + 1 -1 = 0
+j=  1 , j' =  0
+LF( 1 ) = 1 + 1 -1 = 1
+j > j'
+Incrementing row: 0
+Moving rows 1 0
+Loop of Stage IIb A$G
+S I F L
+2 0 $ A
+0 2 A $
+1 1 G G
+LF( 0 ) = 1 + 1 -1 = 1
+j=  1 , j' =  1
+After stageIIb
+--------
+_|A|$|G|
+$|0|1|1|
+A|1|1|1|
+G|0|0|1|
+--------
+S I F L
+2 0 $ A
+0 2 A $
+1 1 G G
+FAILED
+Correct result: AG$
+Actual results: A$G
+ Actual | Correct
+2 0 $ A | 2 2 $ A
+0 2 A $ | 1 1 A G
+1 1 G G | 0 0 G $
+
+====================================================
+Testing i = 1 , c =, G
+Before: T = A$  BWT = A$
+After: T'=  AG$ BWT'= G$A
+Inserting G at index 1
+Original
+------
+_|A|$|
+$|0|1|
+A|1|1|
+------
+S I F L
+1 1 $ A
+0 0 A $
+LF( 0 ) = 1 + 1 -1 = 1
+INS: k= 0 ; LF(k)=: 1
+After stageIb
+------
+_|G|$|
+$|0|1|
+A|0|0|
+------
+S I F L
+1 1 $ G
+0 0 G $
+inserting A at row: 1
+After stageIIa
+--------
+_|G|A|$|
+$|0|0|1|
+A|0|1|1|
+G|1|1|1|
+--------
+S I F L
+2 2 $ G
+1 1 A A
+0 0 G $
+LF( 1 ) = 1 + 1 -1 = 1
+j=  2 , j' =  1
+LF( 2 ) = 0 + 1 -1 = 0
+j > j'
+Incrementing row: 1
+Moving rows 2 1
+Loop of Stage IIb G$A
+S I F L
+2 1 $ G
+0 2 A $
+1 0 G A
+LF( 1 ) = 0 + 1 -1 = 0
+j=  0 , j' =  0
+After stageIIb
+--------
+_|G|$|A|
+$|0|1|1|
+A|0|0|1|
+G|1|1|1|
+--------
+S I F L
+2 1 $ G
+0 2 A $
+1 0 G A
+SUCCEEDED
+
+====================================================
+Testing i = 0 , c =, T
+Before: T = A$  BWT = A$
+After: T'=  TA$ BWT'= AT$
+Inserting T at index 0
+Original
+------
+_|A|$|
+$|0|1|
+A|1|1|
+------
+S I F L
+1 1 $ A
+0 0 A $
+LF( 1 ) = 0 + 1 -1 = 0
+INS: k= 1 ; LF(k)=: 0
+After stageIb
+------
+_|A|T|
+$|0|0|
+A|1|1|
+------
+S I F L
+1 1 A A
+0 0 T T
+inserting $ at row: 0
+After stageIIa
+--------
+_|$|A|T|
+$|1|1|1|
+A|0|1|1|
+T|0|0|1|
+--------
+S I F L
+0 0 $ $
+2 2 A A
+1 1 T T
+LF( 0 ) = 0 + 1 -1 = 0
+j=  1 , j' =  0
+LF( 1 ) = 1 + 1 -1 = 1
+j > j'
+Incrementing row: 0
+Moving rows 1 0
+Loop of Stage IIb A$T
+S I F L
+2 0 $ A
+0 2 A $
+1 1 T T
+LF( 0 ) = 1 + 1 -1 = 1
+j=  1 , j' =  1
+After stageIIb
+--------
+_|A|$|T|
+$|0|1|1|
+A|1|1|1|
+T|0|0|1|
+--------
+S I F L
+2 0 $ A
+0 2 A $
+1 1 T T
+FAILED
+Correct result: AT$
+Actual results: A$T
+ Actual | Correct
+2 0 $ A | 2 2 $ A
+0 2 A $ | 1 1 A T
+1 1 T T | 0 0 T $
+
+====================================================
+Testing i = 1 , c =, T
+Before: T = A$  BWT = A$
+After: T'=  AT$ BWT'= T$A
+Inserting T at index 1
+Original
+------
+_|A|$|
+$|0|1|
+A|1|1|
+------
+S I F L
+1 1 $ A
+0 0 A $
+LF( 0 ) = 1 + 1 -1 = 1
+INS: k= 0 ; LF(k)=: 1
+After stageIb
+------
+_|T|$|
+$|0|1|
+A|0|0|
+------
+S I F L
+1 1 $ T
+0 0 T $
+inserting A at row: 1
+After stageIIa
+--------
+_|T|A|$|
+$|0|0|1|
+A|0|1|1|
+T|1|1|1|
+--------
+S I F L
+2 2 $ T
+1 1 A A
+0 0 T $
+LF( 1 ) = 1 + 1 -1 = 1
+j=  2 , j' =  1
+LF( 2 ) = 0 + 1 -1 = 0
+j > j'
+Incrementing row: 1
+Moving rows 2 1
+Loop of Stage IIb T$A
+S I F L
+2 1 $ T
+0 2 A $
+1 0 T A
+LF( 1 ) = 0 + 1 -1 = 0
+j=  0 , j' =  0
+After stageIIb
+--------
+_|T|$|A|
+$|0|1|1|
+A|0|0|1|
+T|1|1|1|
+--------
+S I F L
+2 1 $ T
+0 2 A $
+1 0 T A
+SUCCEEDED
+4 are wrong. 4 are correct.
