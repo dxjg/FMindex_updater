@@ -23,6 +23,8 @@ class DynamicBitVector:
         return count
 
     def select_0(self, occurrence):
+        if len(self._bit_vector) == 0:
+            return -1
         count = 0
         last_occurrence = 0
         for i in xrange(0, len(self._bit_vector)):
@@ -34,6 +36,8 @@ class DynamicBitVector:
         return last_occurrence
 
     def select_1(self, occurrence):
+        if len(self._bit_vector) == 0:
+            return -1
         count = 0
         last_occurrence = 0
         for i in xrange(0, len(self._bit_vector)):
@@ -48,7 +52,7 @@ class DynamicBitVector:
         self._bit_vector = self._bit_vector[:index] + bit + self._bit_vector[index:]
 
     def delete(self, index):
-        self._bit_vector = self._bit_vector[:index-1] + self._bit_vector[index:]
+        self._bit_vector = self._bit_vector[:index] + self._bit_vector[index+1:]
 
     def get_bit_vector(self):
         return self._bit_vector
@@ -150,20 +154,20 @@ class DynamicWaveletTree:
             return DynamicWaveletTree._rank(node.get_right(), character, count-1)
 
     @staticmethod
-    def _select(node, occurrence):
-        if occurrence <= 0:
-            return 0
+    def _select(node, previous, occurrence):
         parent = node.get_parent()
+        if previous == 'left':
+            next_index = node.select_0(occurrence)
+        elif previous == 'right':
+            next_index = node.select_1(occurrence)
+        if parent is None:
+            return next_index
+        if next_index < 0:
+            return -1
         if parent.get_left() == node:
-            index = parent.select_0(occurrence)
+            return DynamicWaveletTree._select(parent, 'left', next_index+1)
         else:
-            index = parent.select_1(occurrence)
-
-        print index
-        if parent.get_parent() is None:
-            return index
-        else:
-            return DynamicWaveletTree._select(parent, index+1)
+            return DynamicWaveletTree._select(parent, 'right', next_index+1)
 
     @staticmethod
     def _insert(node, character, index):
@@ -171,13 +175,13 @@ class DynamicWaveletTree:
         alphabet = node.get_alphabet()
         split = len(alphabet)/2
         if alphabet.index(character) < split:
-            next_index = index - bit_vector.rank(index)
             bit_vector.insert('0', index)
+            next_index = bit_vector.rank_0(index) - 1
             if len(alphabet) != 1:
                 DynamicWaveletTree._insert(node.get_left(), character, next_index)
         else:
-            next_index = bit_vector.rank(index)
             bit_vector.insert('1', index)
+            next_index = bit_vector.rank_1(index) - 1
             if len(alphabet) != 1:
                 DynamicWaveletTree._insert(node.get_right(), character, next_index)
 
@@ -186,10 +190,11 @@ class DynamicWaveletTree:
         bit_vector = node.get_bit_vector()
         alphabet = node.get_alphabet()
         if bit_vector.get_bit_vector()[index] == '0':
-            next_index = index - bit_vector.rank(index)
+            next_index = bit_vector.rank_0(index) - 1
             if len(alphabet) != 1:
                 DynamicWaveletTree._delete(node.get_left(), next_index)
-            next_index = bit_vector.rank(index)
+        else:
+            next_index = bit_vector.rank_1(index) - 1
             if len(alphabet) != 1:
                 DynamicWaveletTree._delete(node.get_right(), next_index)
         bit_vector.delete(index)
@@ -203,6 +208,8 @@ class DynamicWaveletTree:
         return DynamicWaveletTree._rank(self._head, character, index)
 
     def select(self, character, occurrence):
+        if occurrence <= 0:
+            return -1
         node = self._head
         while True:
             alphabet = node.get_alphabet()
@@ -213,7 +220,7 @@ class DynamicWaveletTree:
                 node = node.get_left()
             else:
                 node = node.get_right()
-        return DynamicWaveletTree._select(node, occurrence)
+        return DynamicWaveletTree._select(node, 'right', occurrence)
 
     def insert(self, character, index):
         DynamicWaveletTree._insert(self._head, character, index)
