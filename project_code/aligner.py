@@ -78,7 +78,7 @@ class Aligner(object):
 	                          D[i  , j-1] + s('-',    y[j-1])) # horizontal
 	    return D
 
-	def _edit_str(self, edit_list, word, read):
+	def _edit_str(self, word, read):
 		#create list of all edits by doing global alignment and traceback
 		edits = []
 		D = self._globalAlignment(word, read, self._cost) # get alignment matrix
@@ -98,35 +98,24 @@ class Aligner(object):
 				j -= 1
 		return edits
 
-	def _findNeighbor(self, wlist, read, word, d, n, position, edit_list, elist):
+	def _findNeighbor(self, wlist, read, word, position):
 		letters = ['A', 'C', 'G', 'T']
 		for x in letters:
 			word2 = word[0:position] + x + word[position + 1:] # create substitutions
-			edit_list2 = copy.deepcopy(edit_list)
 			if word2 not in wlist:
 				wlist.append(word2)
-				edit_list2.append([position, x])
-				elist.append(edit_list2)
 
 			word3 = word[0:position] + word[position + 1:] # create deletions
-			edit_list3 = copy.deepcopy(edit_list)
 			if word3 not in wlist:
 				wlist.append(word3)
-				edit_list3.append([position, None])
-				elist.append(edit_list3)
 
 			word4 = word[0:position] + x + word[position:] # create insertions
-			edit_list4 = copy.deepcopy(edit_list)
 			if word4 not in wlist:
 				wlist.append(word4)
-				edit_list4.append([position, x + word[position]])
-				elist.append(edit_list4)
 
 	def _neighbor_control(self, read):
 		wlist = []
-		elist = []
 		wlist.append(read)
-		elist.append([])
 		n = 1 # n = number of edits
 		pos = -1 # pos = alignment position in reference genome
 		word = read
@@ -135,35 +124,33 @@ class Aligner(object):
 			ind2 = len(wlist)
 			for i in range(ind1, len(wlist)): # generate neighbors within i edit distance
 				for p in range(0, len(wlist[i])):
-					self._findNeighbor(wlist, read, wlist[i], 1, 1, p, elist[i], elist)
+					self._findNeighbor(wlist, read, wlist[i], p)
 			ind1 = ind2
 			for x in range(ind2, len(wlist)): # check if neighbors are in FM index
 				pos = self._query_fm(wlist[x])
 				if pos > -1:
-					return pos, wlist[x], elist[x]
+					return pos, wlist[x]
 			n += 1 # if not found, add another edit
-		return -1, "X" * len(read), []
+		return -1, "X" * len(read)
 
 	def _align(self, read):
 		pos = self._query_fm(read) #check if read is in FM index
 		if pos > -1:
-			edits = self._edit_str([], read, read)
+			edits = self._edit_str(read, read)
 		else: # start checking for neighbor matches
-			pos, word, edit_list = self._neighbor_control(read)
+			pos, word = self._neighbor_control(read)
 			if pos > -1:
-				edits = self._edit_str(edit_list, word, read)
+				edits = self._edit_str(word, read)
 			else:
 				edits = list(read)
 
 		return pos, edits
 
 	def _subBase(self, pos, char):
-		#TODO
-		pos = pos #get rid of indent error
+		fm._subBase(pos, char)
 
 	def _insBase(self, pos, char):
-		fm._insertIntoBWT(pos, char)
+		fm._insBase(pos, char)
 
 	def _delBase(self, pos, base):
-		#TODO
-		pos = pos
+		fm._insBase(pos, char)
