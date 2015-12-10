@@ -10,19 +10,20 @@ import fmindex
 
 def main():
     #Genome from paper is: CTCTGC 
-    findLong(int(sys.argv[1]))
-    '''
+    #findLong(int(sys.argv[1]))
+    
     string = sys.argv[1]
     if '$' in string:
         print "Don't include $ in genome"
         sys.exit(0)
     if len(sys.argv) == 4:
         fm = testIns(string, int(sys.argv[3]), sys.argv[2])
+#        fm = testDel(string, int(sys.argv[3]), sys.argv[2])
     else:
         stressTest(string)
-    '''
+    
 def findLong(n):
-    random.seed(5234)
+    #random.seed()
     string = ''.join([random.choice('ACGT') for _ in xrange(n)])
     print string
     stressTest(string)
@@ -42,35 +43,20 @@ def stressTest(string):
             afterfm = fmindex.FMindex(afterString)
             print "After: T'= ", afterString + '$', "BWT'=", afterfm.bwt
             fm = testIns(string, i, c)
-            #fm = testDel(fm, i)
             if afterfm.bwt == fm.bwt:
-                print "SUCCEEDED"
-                numCorrect += 1
-            else:
-                print "FAILED"
-            print "Correct result:", afterfm.bwt
-            print "Actual results:", fm.bwt
-            print " Actual | Correct"
-            for j in range(len(afterfm.bwt)):
-                correctResults=' '.join([str(afterfm.sa[j]),str(afterfm.isa[j]), sorted(afterfm.bwt)[j], afterfm.bwt[j]])
-                if j >= len(fm.bwt):
-                    actualResults = "         |"
-                else:
-                    actualResults=' '.join([str(fm.sa[j]),str(fm.isa[j]),sorted(fm.bwt)[j],fm.bwt[j], "|"])
-                print actualResults, correctResults
-            numTotal += 1
-            del fm
-    print numCorrect, "correct.", numTotal - numCorrect, "wrong." 
+                numCorrect+=1
+            numTotal+=1
+    print "Correct:", numCorrect, "Wrong:", numTotal - numCorrect
+
+            
     
 
 def testIns(string, i, c):
-    print "Inserting", c, "at index", i
     fm = fmindex.createFM(string)
     before = fm.bwt
     fm.insBase(i, c)
     afterString = string[:i] + c + string[i:]
     afterfm = fmindex.FMindex(afterString)
-    print "After: T'= ", afterString + '$', "BWT'=", afterfm.bwt
     #fm = testDel(fm, i)
     if afterfm.bwt == fm.bwt:
         print "SUCCEEDED"
@@ -88,10 +74,29 @@ def testIns(string, i, c):
         print actualResults, correctResults
     return fm
 
-def testDel(fm, index):
-    print "Deleting 'G' from index 2" 
-    print fm.bwt
-    fm.delBase(index)
+def testDel(string, i, c):
+    print "Deleting", c, "at index", i
+    fm = fmindex.createFM(string)
+    before = fm.bwt
+    fm.delBase(i)
+    afterString = string[:i] + string[i + 1:]
+    afterfm = fmindex.FMindex(afterString)
+    print "After: T'= ", afterString + '$', "BWT'=", afterfm.bwt
+    #fm = testDel(fm, i)
+    if afterfm.bwt == fm.bwt:
+        print "SUCCEEDED"
+    else:
+        print "FAILED"
+    print "Correct result:", afterfm.bwt
+    print "Actual results:", fm.bwt
+    print " Actual | Correct"
+    for j in range(len(afterfm.bwt)):
+        correctResults=' '.join([str(afterfm.sa[j]),str(afterfm.isa[j]), sorted(afterfm.bwt)[j], afterfm.bwt[j]])
+        if j >= len(fm.bwt):
+            actualResults = "         |"
+        else:
+            actualResults=' '.join([str(fm.sa[j]),str(fm.isa[j]),sorted(fm.bwt)[j],fm.bwt[j], "|"])
+        print actualResults, correctResults
     return fm
 
 if __name__ == '__main__':
