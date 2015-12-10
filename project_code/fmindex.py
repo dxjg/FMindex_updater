@@ -13,9 +13,10 @@ class FMindex(object):
         self.sa, self.isa = self._createSA(genome)
 
     def _lf(self, index):
-        C = self.count[self.bwt[index]]
-        Occ = self.occ[self.bwt[index]][index]
-        print "LF(", index, ") =", C, "+", Occ, - 1, "=", C + Occ - 1
+        c = self.bwt[index]
+        C = self.count[c]
+        Occ = self.occ[c][index]
+        print "LF(", index, ") =", C, "+", Occ, "-1 =", C + Occ - 1
         return C + Occ - 1
 
     def insBase(self, i, c):
@@ -124,20 +125,34 @@ class FMindex(object):
 
     #Part of insBase, subBase, and delBase
     def _move(self, j, j_prime):
-        saved = self.bwt[j]
-        self.bwt = self.bwt[:j] + self.bwt[j+1:]
-        self.bwt = self.bwt[:j_prime] + saved + self.bwt[j_prime:]
-        #Updating SA
-        temp = self.sa[j]
-        self.sa[j] = self.sa[j_prime]
-        self.sa[j_prime] = temp
-        #Updating ISA
-        for value in range(j + 1, j_prime + 1):
-            index = self.sa[value]
-            print "Decrementing row:", index
-            self.isa[index] -= 1
-        self.isa[self.sa[j]] = j_prime
-        print "Moving rows" , j, j_prime
+        if j < j_prime:
+            self.bwt = self.bwt[:j] + self.bwt[j+1:j_prime + 1] + self.bwt[j] + self.bwt[j_prime + 1:]
+            #Updating SA
+            temp = self.sa[j]
+            self.sa[j] = self.sa[j_prime]
+            self.sa[j_prime] = temp
+            #Updating ISA
+            for value in range(j + 1, j_prime + 1):
+                index = self.isa.index(value)
+                print "Decrementing row:", index, ", Containing:", value
+                self.isa[index] -= 1
+            print "Setting row", self._index(j), "to", j_prime
+            self.isa[self.isa.index(j)] = j_prime
+            print "Moving rows" , j, j_prime
+        else:
+            self.bwt = self.bwt[:j_prime] + self.bwt[j] + self.bwt[j_prime:j] + self.bwt[j+1:]
+            #Updating SA
+            temp = self.sa[j]
+            self.sa[j] = self.sa[j_prime]
+            self.sa[j_prime] = temp
+            #Updating ISA
+            for value in range(j_prime, j):
+                index = self.isa.index(value)
+                print "Incrementing row:", index
+                self.isa[index] += 1
+            self.isa[self.sa[j]] = j_prime
+            print "Moving rows" , j, j_prime
+
 
 
 ####################################################################################
@@ -149,8 +164,14 @@ class FMindex(object):
     def ins_stageIb(self, i, c):
         #TODO right now count is rebuilt entirely (time consuming)
         #Waiting on implementing navarro
-        k = self._index(i)
+        k = self.isa[i]
+        print self.count
         overwritten = self.bwt[k]
+        self.overwritten = overwritten
+        self.c = c
+        self.lf_k = self._lf(k)
+        self.pos = self.lf_k
+        print "overwriting the character at index", k
         self.bwt = self.bwt[:k] + self.bwt[k+1:]
         self.bwt = self.bwt[:k] + c + self.bwt[k:]
         return overwritten, k
@@ -158,18 +179,23 @@ class FMindex(object):
     def ins_stageIIa(self, overwritten, k, i): 
         self.count = self._createCount()
         self.occ = self._createOcc()
-        lf_k = self.count[self.bwt[k]] + self.occ[self.bwt[k]][k] - 1
-        print "INS: k=", k, "; LF(k)=:", lf_k, 
-        print "inserting", overwritten, "at row:", 
+        #The letter clearly matters, A vs C vs G vs T  
+        lf_k = self.lf_k
+        print "INS: k=", k, "; LF(k)=:", lf_k
+        print "inserting", overwritten, "at row:", lf_k 
         self.bwt = self.bwt[:lf_k] + overwritten + self.bwt[lf_k:]
+        self._updateSA(lf_k, i)
+        self.pos += 1
         self.count = self._createCount()
         self.occ = self._createOcc()
-        self._updateSA(lf_k, i)
         return lf_k
 
     def ins_stageIIb(self, i, lf_k, k): 
         j = lf_k + 1
         j_prime = self._lf(lf_k)
+        if self.c > self.overwritten: 
+            j_prime += 1
+        print j, j_prime
         while j != j_prime:
             new_j = self._lf(j)
             self._move(j, j_prime)
