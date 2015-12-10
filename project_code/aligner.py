@@ -3,6 +3,7 @@ from fmindex import FMindex
 import fmindex
 import sys
 import copy
+import numpy
 
 
 class Aligner(object):
@@ -13,46 +14,88 @@ class Aligner(object):
 		self.fm = fmindex.createFM(genome) #also fm.count, fm.occ, fm.sa
 
 	def _recurse_query_fm(self, word, word_index, fm_index):
+		# recursively do LF to find match in fm index
 		prev_index = self.fm._lf(fm_index)
 		word_index -= 1
-		#print "query:", word, "w_index", word_index, "fm_ind", fm_index, "w[ind]", word[word_index],"bwt[ind]", self.fm.bwt[prev_index]
 		if word[word_index] == self.fm.bwt[fm_index]:
 			if word_index > 0:
 				return self._recurse_query_fm(word, word_index, prev_index)
 			else:
 				return self.fm.sa[fm_index] - 1
 		else:
-			#print "not found", word, word_index, fm_index, word[word_index], self.fm.bwt[prev_index]
 			return -1
 
 	def _query_fm(self, word):
+		# get range for word's last character in bwt
 		word_index = len(word) - 1
 		char = word[word_index]
-		chars = ['A', 'C', 'G', 'T'] # because count gets # chars before and including
-		char_ind = chars.index(char)
+		chars = ['A', 'C', 'G', 'T']
+		if char in chars:
+			char_ind = chars.index(char)
+		else:
+			print "Invalid Character. Please use only A, C, G, or T."
+			exit()
 		ch = len(self.fm.bwt)
 		if char_ind < 3:
 			ch = self.fm.count[chars[char_ind + 1]]
-		fm_start =  self.fm.count[char]
-		fm_end =  ch
-		#print fm_start, fm_end, word
+		fm_start =  self.fm.count[char] # start of char's character range
+		fm_end = ch # end of character range
 		pos = -1
+		# check for match with all characters in range
 		i = fm_start
 		while (pos == -1) and (i < fm_end):
-			#print "i", i
 			pos = self._recurse_query_fm(word, word_index, i)
 			i += 1
 		return pos #returns -1 if not found
 
+	#Adapted from code provided in class. Cost function assigning 0 to match,
+   	#1 to transition, 1 to transversion, and 1 to a gap """
+	def _cost(self, xc, yc):
+		if xc == yc:
+			return 0 # match
+		if xc == '-' or yc == '-': 
+			return 1 # gap
+		minc, maxc = min(xc, yc), max(xc, yc)
+		if minc == 'A' and maxc == 'G': 
+			return 1 # transition
+		elif minc == 'C' and maxc == 'T':
+			return 1 # transition
+		return 1 # transversion
+
+	def _globalAlignment(self, x, y, s):
+    	#Adapted from code provided in class. Calculate global alignment value 
+    	#of sequences x and y using dynamic programming.  Return global 
+	    #alignment value."""
+	    D = numpy.zeros((len(x)+1, len(y)+1), dtype=int)
+	    for j in range(1, len(y)+1):
+	        D[0, j] = D[0, j-1] + s('-', y[j-1])
+	    for i in range(1, len(x)+1):
+	        D[i, 0] = D[i-1, 0] + s(x[i-1], '-')
+	    for i in range(1, len(x)+1):
+	        for j in range(1, len(y)+1):
+	            D[i, j] = min(D[i-1, j-1] + s(x[i-1], y[j-1]), # diagonal
+	                          D[i-1, j  ] + s(x[i-1], '-'),    # vertical
+	                          D[i  , j-1] + s('-',    y[j-1])) # horizontal
+	    return D
+
 	def _edit_str(self, edit_list, word, read):
-		#TODO
+		#create list of all edits by doing global alignment and traceback
 		edits = []
-		for x in range(0, max(len(read), len(word))):
-			if x in edit_list:
-				edits.append(edit_list[x])
-			else:
-				if x < len(read) and x < len(word):
-					edits.append(read[x])
+		D = self._globalAlignment(word, read, self._cost) # get alignment matrix
+		i = len(D)-1
+		j = len(D[0])-1
+		while i > 0 and j > 0: # traceback to get edit string
+			min_val = min(D[i-1, j-1], D[i-1, j],  D[i, j-1])
+			if D[i-1, j-1] == min_val: # substitutions/matches
+				edits.insert(0, word[i-1])
+				i -= 1
+				j -= 1
+			elif D[i-1, j] == min_val: # insertions
+				edits[0] = word[i-1] + edits[0]
+				i -= 1
+			elif D[i, j-1] == min_val: # deletions
+				edits.insert(0, '')
+				j -= 1
 		return edits
 
 	def _findNeighbor(self, wlist, read, word, d, n, position, edit_list, elist):
@@ -62,68 +105,57 @@ class Aligner(object):
 			edit_list2 = copy.deepcopy(edit_list)
 			if word2 not in wlist:
 				wlist.append(word2)
-				edit_list2[position] = x
+				edit_list2.append([position, x])
 				elist.append(edit_list2)
-			#if (n < d):
-			#	self._findNeighbor(wlist, read, word2, d, n + 1, 0, edit_list, elist)
-				
+
 			word3 = word[0:position] + word[position + 1:] # create deletions
 			edit_list3 = copy.deepcopy(edit_list)
 			if word3 not in wlist:
 				wlist.append(word3)
-				edit_list3[position] = None
+				edit_list3.append([position, None])
 				elist.append(edit_list3)
-			#if (n < d):
-			#	self._findNeighbor(wlist, read, word3, d, n + 1, 0, edit_list, elist)
 
 			word4 = word[0:position] + x + word[position:] # create insertions
 			edit_list4 = copy.deepcopy(edit_list)
 			if word4 not in wlist:
 				wlist.append(word4)
-				#print word4
-				edit_list4[position] = x + word[position]
+				edit_list4.append([position, x + word[position]])
 				elist.append(edit_list4)
-			#if (n < d):
-			#	self._findNeighbor(wlist, read, word4, d, n + 1, 0, edit_list, elist)
-		#if (position <= len(word)):
-		#	self._findNeighbor(wlist, read, read, d, n, position + 1, edit_list, elist)		
 
 	def _neighbor_control(self, read):
 		wlist = []
-		wlist.append(read)
-		edit_list = {}
 		elist = []
-		elist.append({})
-		n = 1
-		pos = -1
+		wlist.append(read)
+		elist.append([])
+		n = 1 # n = number of edits
+		pos = -1 # pos = alignment position in reference genome
 		word = read
 		ind1 = 0
 		while n < len(read) and pos < 0:
 			ind2 = len(wlist)
-			for i in range(ind1, len(wlist)):
+			for i in range(ind1, len(wlist)): # generate neighbors within i edit distance
 				for p in range(0, len(wlist[i])):
 					self._findNeighbor(wlist, read, wlist[i], 1, 1, p, elist[i], elist)
 			ind1 = ind2
-			for x in range(ind2, len(wlist)):
+			for x in range(ind2, len(wlist)): # check if neighbors are in FM index
 				pos = self._query_fm(wlist[x])
 				if pos > -1:
-					print wlist[x]
 					return pos, wlist[x], elist[x]
-			n += 1
-		return -1, read, {}
+			n += 1 # if not found, add another edit
+		return -1, "X" * len(read), []
 
 	def _align(self, read):
-		pos = self._query_fm(read)
+		pos = self._query_fm(read) #check if read is in FM index
 		if pos > -1:
-			edits = self._edit_str({}, read, read)
-		else:
+			edits = self._edit_str([], read, read)
+		else: # start checking for neighbor matches
 			pos, word, edit_list = self._neighbor_control(read)
 			if pos > -1:
 				edits = self._edit_str(edit_list, word, read)
 			else:
 				edits = list(read)
 
-		return pos, edits #Build a tree instead?
+		return pos, edits
 
 	def _subBase(self, pos, char):
 		#TODO
