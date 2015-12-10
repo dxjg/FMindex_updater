@@ -4,7 +4,16 @@ class DynamicBitVector:
     def __init__(self, bit_vector):
         self._bit_vector = bit_vector
 
-    def rank(self, index):
+    def rank_0(self, index):
+        count = 0
+        for i in xrange(0, index+1):
+            if i == len(self._bit_vector):
+                break
+            if self._bit_vector[i] == '0':
+                count += 1
+        return count
+
+    def rank_1(self, index):
         count = 0
         for i in xrange(0, index+1):
             if i == len(self._bit_vector):
@@ -15,21 +24,25 @@ class DynamicBitVector:
 
     def select_0(self, occurrence):
         count = 0
+        last_occurrence = 0
         for i in xrange(0, len(self._bit_vector)):
             if self._bit_vector[i] == '0':
                 count += 1
+                last_occurrence = i
             if count == occurrence:
                 return i
-        return (len(self._bit_vector)-1)
+        return last_occurrence
 
     def select_1(self, occurrence):
         count = 0
+        last_occurrence = 0
         for i in xrange(0, len(self._bit_vector)):
             if self._bit_vector[i] == '1':
                 count += 1
+                last_occurrence = i
             if count == occurrence:
                 return i
-        return (len(self._bit_vector)-1)
+        return last_occurrence
 
     def insert(self, bit, index):
         self._bit_vector = self._bit_vector[:index] + bit + self._bit_vector[index:]
@@ -56,12 +69,17 @@ class Node:
                 bit_vector_string += '1'
         self._bit_vector = DynamicBitVector(bit_vector_string)
 
+    def rank_0(self, index):
+        return self._bit_vector.rank_0(index)
 
-    def rank(self, index):
-        return self._bit_vector.rank(index)
+    def rank_1(self, index):
+        return self._bit_vector.rank_1(index)
 
-    def select(self, occurrence):
-        return self._bit_vector.select(occurence)
+    def select_0(self, occurrence):
+        return self._bit_vector.select_0(occurrence)
+
+    def select_1(self, occurrence):
+        return self._bit_vector.select_1(occurrence)
 
     def insert(self, bit, index):
         self._bit_vector.insert(bit, index)
@@ -118,27 +136,34 @@ class DynamicWaveletTree:
     def _rank(node, character, index):
         alphabet = node.get_alphabet()
         if (len(alphabet) == 1):
-            return index
+            return node.rank_1(index)
         split = len(alphabet)/2
         if alphabet.index(character) < split:
-            new_index = index - node.rank(index)
-            return DynamicWaveletTree._rank(node.get_left(), character, new_index)
+            count = node.rank_0(index)
+            if count == 0:
+                return 0
+            return DynamicWaveletTree._rank(node.get_left(), character, count-1)
         else:
-            new_index = node.rank(index)
-            return DynamicWaveletTree._rank(node.get_right(), character, new_index)
+            count = node.rank_1(index)
+            if count == 0:
+                return 0
+            return DynamicWaveletTree._rank(node.get_right(), character, count-1)
 
     @staticmethod
     def _select(node, occurrence):
+        if occurrence <= 0:
+            return 0
         parent = node.get_parent()
-        print node.get_bit_vector().get_bit_vector()
         if parent.get_left() == node:
-            index = parent.get_bit_vector().select_0(occurrence) + 1
+            index = parent.select_0(occurrence)
         else:
-            index = parent.get_bit_vector().select_1(occurrence) + 1
+            index = parent.select_1(occurrence)
+
+        print index
         if parent.get_parent() is None:
             return index
         else:
-            return DynamicWaveletTree._select(parent, index)
+            return DynamicWaveletTree._select(parent, index+1)
 
     @staticmethod
     def _insert(node, character, index):
@@ -188,7 +213,7 @@ class DynamicWaveletTree:
                 node = node.get_left()
             else:
                 node = node.get_right()
-        return DynamicWaveletTree._select(node, occurrence) - 1
+        return DynamicWaveletTree._select(node, occurrence)
 
     def insert(self, character, index):
         DynamicWaveletTree._insert(self._head, character, index)
