@@ -125,6 +125,9 @@ class Node:
     def get_parent(self):
         return self._parent
 
+    def get_size(self):
+        return len(self._bit_vector.get_bit_vector())
+
 class DynamicWaveletTree:
     @staticmethod
     def _create_wavelet_tree(node, sequence):
@@ -168,6 +171,15 @@ class DynamicWaveletTree:
             return DynamicWaveletTree._select(parent, 'left', next_index+1)
         else:
             return DynamicWaveletTree._select(parent, 'right', next_index+1)
+
+    @staticmethod
+    def _count(node, character):
+        alphabet = node.get_alphabet()
+        if len(alphabet) == 1:
+            if alphabet < character: return node.get_size()
+            else: return 0
+        return DynamicWaveletTree._count(node.get_left(), character) + \
+               DynamicWaveletTree._count(node.get_right(), character)
 
     @staticmethod
     def _insert(node, character, index):
@@ -221,6 +233,10 @@ class DynamicWaveletTree:
             else:
                 node = node.get_right()
         return DynamicWaveletTree._select(node, 'right', occurrence)
+
+
+    def count(self, character):
+        return DynamicWaveletTree._count(self._head, character)
 
     def insert(self, character, index):
         DynamicWaveletTree._insert(self._head, character, index)
