@@ -17,7 +17,7 @@ def main():
     numCorrect = 0
     numTotal = 0
     for c in "ACGT":
-        for i in range(len(string)+1):
+        for i in range(len(string) + 1):
             fm = fmindex.createFM(string)
             print "\n===================================================="
             print "Testing i =", i, ", c =,", c
@@ -26,25 +26,24 @@ def main():
             afterfm = fmindex.FMindex(afterString)
             print "After: T'= ", afterString + '$', "BWT'=", afterfm.bwt
             fm = testIns(fm, i, c)
-            #testDel(fm, index)
+            #fm = testDel(fm, i)
             if afterfm.bwt == fm.bwt:
                 print "SUCCEEDED"
                 numCorrect += 1
-            else:
-                print "FAILED"
-                print "Correct result:", afterfm.bwt
-                print "Actual results:", fm.bwt
-                print " Actual | Correct"
-                for j in range(len(afterfm.bwt)):
-                    correctResults=' '.join([str(afterfm.sa[j]),str(afterfm.isa[j]), sorted(afterfm.bwt)[j], afterfm.bwt[j]])
-                    if j >= len(fm.bwt):
-                        actualResults = "         |"
-                    else:
-                        actualResults=' '.join([str(fm.sa[j]),str(fm.isa[j]),sorted(fm.bwt)[j],fm.bwt[j], "|"])
-                    print actualResults, correctResults
+            print "FAILED"
+            print "Correct result:", afterfm.bwt
+            print "Actual results:", fm.bwt
+            print " Actual | Correct"
+            for j in range(len(afterfm.bwt)):
+                correctResults=' '.join([str(afterfm.sa[j]),str(afterfm.isa[j]), sorted(afterfm.bwt)[j], afterfm.bwt[j]])
+                if j >= len(fm.bwt):
+                    actualResults = "         |"
+                else:
+                    actualResults=' '.join([str(fm.sa[j]),str(fm.isa[j]),sorted(fm.bwt)[j],fm.bwt[j], "|"])
+                print actualResults, correctResults
             numTotal += 1
             del fm
-    print numTotal - numCorrect, "are wrong.", numCorrect, "are correct." 
+    print numCorrect, "correct.", numTotal - numCorrect, "wrong." 
 
  
 
@@ -58,6 +57,7 @@ def testDel(fm, index):
     print "Deleting 'G' from index 2" 
     print fm.bwt
     fm.delBase(index)
+    return fm
 
 if __name__ == '__main__':
     main()
