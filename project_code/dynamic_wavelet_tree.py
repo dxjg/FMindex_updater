@@ -71,7 +71,7 @@ class DynamicBitVector:
         return self._bit_vector
 
 class Node:
-    """ The node is a main component of the dynamic wavelet tree. Each node
+    """ The Node is a main component of the dynamic wavelet tree. Each node
         contains a dynamic bit vector and general information to support
         integration into tree data structures. """
 
@@ -181,8 +181,16 @@ class Node:
         return len(self._bit_vector.get_bit_vector())
 
 class DynamicWaveletTree:
+    """ The dynamic wavelet tree is a binary tree which supports rank and
+        select operations on a sequence along with insertions and
+        deletions. The count method is also included in this implementation
+        of the wavelet tree. """
+
     @staticmethod
     def _create_wavelet_tree(node, sequence):
+        """ Recursive static method used to generate the wavelet tree during
+            initialization. """
+
         left_node, right_node, left_sequence, right_sequence = node.split_node(sequence)
         node.set_left(left_node)
         node.set_right(right_node)
@@ -193,6 +201,9 @@ class DynamicWaveletTree:
 
     @staticmethod
     def _rank(node, character, index):
+        """ Recursive static method used to determine the rank of a @character
+            at some @index. """
+
         alphabet = node.get_alphabet()
         if (len(alphabet) == 1):
             return node.rank_1(index)
@@ -210,6 +221,10 @@ class DynamicWaveletTree:
 
     @staticmethod
     def _select(node, previous, occurrence):
+        """ Recursive static method used to determine the index the
+            (occurrence)'th occurrence of a character in the original
+            sequence. """
+
         parent = node.get_parent()
         if previous == 'left':
             next_index = node.select_0(occurrence)
@@ -226,6 +241,9 @@ class DynamicWaveletTree:
 
     @staticmethod
     def _count(node, character):
+        """ Recursive static method used to determine number of characters
+            in the sequence that are lesser in value than @character. """
+
         alphabet = node.get_alphabet()
         if len(alphabet) == 1:
             if alphabet < character: return node.get_size()
@@ -235,6 +253,7 @@ class DynamicWaveletTree:
 
     @staticmethod
     def _insert(node, character, index):
+        """ Recursive static method to insert @character at @index. """
         bit_vector = node.get_bit_vector()
         alphabet = node.get_alphabet()
         split = len(alphabet)/2
@@ -251,6 +270,7 @@ class DynamicWaveletTree:
 
     @staticmethod
     def _delete(node, index):
+        """ Recursive static method to delete the character at @index. """
         bit_vector = node.get_bit_vector()
         alphabet = node.get_alphabet()
         if bit_vector.get_bit_vector()[index] == '0':
@@ -264,14 +284,19 @@ class DynamicWaveletTree:
         bit_vector.delete(index)
 
     def __init__(self, sequence):
+        """ Initializes the wavelet tree using @sequence. """
         self._head = Node('$ACGT', sequence)
         DynamicWaveletTree._create_wavelet_tree(self._head, sequence)
         return None
 
     def rank(self, character, index):
+        """ Returns the rank of @character at @index. """
         return DynamicWaveletTree._rank(self._head, character, index)
 
     def select(self, character, occurrence):
+        """ Returns the index of the (@occurrence)'th occurrence of @character
+            in the sequence. """
+
         if occurrence <= 0:
             return -1
         node = self._head
@@ -286,15 +311,14 @@ class DynamicWaveletTree:
                 node = node.get_right()
         return DynamicWaveletTree._select(node, 'right', occurrence)
 
-
     def count(self, character):
+        """ Returns the count value associated with @character. """
         return DynamicWaveletTree._count(self._head, character)
 
     def insert(self, character, index):
+        """ Inserts @character at @index. """
         DynamicWaveletTree._insert(self._head, character, index)
 
     def delete(self, index):
+        """ Deletes the character at @index. """
         DynamicWaveletTree._delete(self._head, index)
-
-    def print_sequence(self):
-        print self._head.get_bit_vector().get_bit_vector()
