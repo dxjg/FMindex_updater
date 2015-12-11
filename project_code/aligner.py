@@ -80,7 +80,7 @@ class Aligner(object):
 		while i > 0 and j > 0: # traceback to get edit string
 			min_val = min(D[i-1, j-1], D[i-1, j],  D[i, j-1])
 			if D[i-1, j-1] == min_val: # substitutions/matches
-				edits.insert(0, read[j-1])
+				edits.insert(0, word[i-1])
 				i -= 1
 				j -= 1
 			elif D[i-1, j] == min_val: # insertions
