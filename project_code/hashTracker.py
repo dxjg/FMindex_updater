@@ -63,15 +63,15 @@ class hashTracker:
 			idx = alignmentPos
 			for c in range(i):
 				idx += len(alignment[c])
+			self.initToDict(self.counts, idx)
 			if len(alignPos) == 1: # This is a sub or a match
-				self.initToDict(self.counts, idx)
 				if self.counts[idx]['BASE'] == None:
 					# Mark the correct base
-					self.counts[idx]['BASE'] = read[i]
+					self.counts[idx]['BASE'] = alignPos
 				# Increment the counters
 				if i == 0 or alignment[i - 1] != '':
 					# To prevent double counting w/dels
-					self.counts[idx][alignPos] += 1
+					self.counts[idx][read[i]] += 1
 			elif alignPos == '':
 				#deletion
 				if i == len(alignment) - 1 or alignment[i+1] != '':
@@ -89,9 +89,10 @@ class hashTracker:
 			else:
 				# Insert aka delete from ref
 				for ins in range(len(alignPos) - 1):
-					if (idx+ins) in self.counts and'' in self.counts[idx + ins]:
+					if (idx+ins) in self.counts and '' in self.counts[idx + ins]:
 						self.counts[idx + ins][''] += 1
 					else:
+						self.initToDict(self.counts, idx+ins)
 						self.counts[idx + ins][''] = 0
 	
 
@@ -146,12 +147,13 @@ class hashRangeTracker:
 	def setInterval(self, interval):
 		""" The overall length is split in ranges so we can update a block at a time"""
 		self.interval = interval
-		self.__init__(self.refLen)
+		self.__init__()
 
 
 	def setRefLen(self, length):
 		""" Reference genome length"""
 		self.refLen = length
+		self.__init__()
 
 
 	def setTrigger(self, trig):
@@ -165,12 +167,11 @@ class hashRangeTracker:
 			t.setMinReads(num)
 
 
-	def __init__(self, refLen):
+	def __init__(self):
 		self.counts = [0 for _ in range(int(self.refLen/self.interval)+1)]
 		self.trackers = [hashTracker(self.interval) for _ in self.counts]
 		for t in self.trackers:
 			t.setRefLen(self.interval)
-		self.refLen = refLen
 
 
 	def addAlignment(self, read, alignment, alignmentPos):
@@ -188,12 +189,12 @@ class hashRangeTracker:
 
 if __name__ == '__main__':
 
-	rt = hashRangeTracker(160)
-	rt.setInterval(10)
+	rt = hashRangeTracker()
+	rt.setInterval(160)
 	rt.setTrigger(5)	
 	rt.setMinReads(2)
 
-	with open('test_data/x.fa') as fi:
+	with open('../test_data/x.fa') as fi:
 		ref = fi.readline().strip()
 		mod = fi.readline().strip()
 		for align in fi:
@@ -201,4 +202,3 @@ if __name__ == '__main__':
 			ret = rt.addAlignment(splitStr[1].strip(), list(splitStr[1].strip()), int(splitStr[0]))
 			if len(ret) > 0:
 				pp.pprint(ret)
-	print(h.heap())

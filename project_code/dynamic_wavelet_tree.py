@@ -325,6 +325,11 @@ class DynamicWaveletTree:
             return
         DynamicWaveletTree._delete(self._head, index)
 
+    def substitution(self, character, index):
+        """ Substitutes the character at @index with @character. """
+        self.delete(index)
+        self.insert(character, index)
+
     def print_count_table(self):
         print '   | count'
         print ' $ | ' + str(self.count('$'))
