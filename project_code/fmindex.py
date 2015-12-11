@@ -185,7 +185,6 @@ class FMindex(object):
         print "inserting", overwritten, "at row:", lf_k 
         self.bwt = self.bwt[:lf_k] + overwritten + self.bwt[lf_k:]
         self._updateSA(lf_k, i)
-        self.pos += 1
         self.count = self._createCount()
         self.occ = self._createOcc()
         return lf_k
@@ -215,7 +214,7 @@ class FMindex(object):
     def  del_stageIb(self, i):
         #TODO right now count is rebuilt entirely (time consuming)
         #Waiting on implementing navarro
-        k = self._index(i)
+        k = self.isa[i]
         overwritten = self.bwt[k]
         lf_k = self._lf(k)
         c = self.bwt[k]
