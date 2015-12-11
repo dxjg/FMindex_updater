@@ -49,7 +49,7 @@ def stressTest(string):
             afterString = string[:i] + string[i+ 1]
             afterfm = fmindex.FMindex(afterString)
 #            print "After: T'= ", afterString + '$', "BWT'=", afterfm.bwt
-            fm = testIns(string, i, c)
+            fm = testDel(string, i, c)
             if afterfm.bwt == fm.bwt:
                 numCorrect+=1
             numTotal+=1
@@ -85,28 +85,16 @@ def testIns(string, i, c):
     return fm
 
 def testDel(string, i, c):
-    print "Deleting", c, "at index", i
     fm = fmindex.createFM(string)
     before = fm.bwt
     fm.delBase(i)
-    afterString = string[:i] + string[i + 1:]
+    afterString = string[:i] + c + string[i:]
     afterfm = fmindex.FMindex(afterString)
-    print "After: T'= ", afterString + '$', "BWT'=", afterfm.bwt
-    #fm = testDel(fm, i)
+    
     if afterfm.bwt == fm.bwt:
-        print "SUCCEEDED"
+        output.extend(["PASS: " + c + " " + n.format(str(i))])
     else:
-        print "FAILED"
-    print "Correct result:", afterfm.bwt
-    print "Actual results:", fm.bwt
-    print " Actual | Correct"
-    for j in range(len(afterfm.bwt)):
-        correctResults=' '.join([str(afterfm.sa[j]),str(afterfm.isa[j]), sorted(afterfm.bwt)[j], afterfm.bwt[j]])
-        if j >= len(fm.bwt):
-            actualResults = "         |"
-        else:
-            actualResults=' '.join([str(fm.sa[j]),str(fm.isa[j]),sorted(fm.bwt)[j],fm.bwt[j], "|"])
-        print actualResults, correctResults
+        output.extend(["FAIL: " + c + " " + n.format(str(i))])
     return fm
 
 if __name__ == '__main__':

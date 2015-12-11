@@ -12,6 +12,10 @@ class FMindex(object):
         self.wave = dynamic_wavelet_tree.DynamicWaveletTree(self.bwt)
         self.sa, self.isa = self._createSA(genome)
         self.state = "IDLE"
+        #length of the bwt. needed by aligner
+        self.n = len(self.bwt)
+        self.lf_before = None
+        self.lf_after = None
 
     #recreate the genome (minus $) from the bwt
     def getInverse(self):
@@ -25,7 +29,7 @@ class FMindex(object):
 
     #Returns the size of the bwt
     def getSize(self):
-        return self.wave.get_size()
+        return self.n
 
     #returns the character located at i in the wavelet/bwt
     def findChar(self, i):
@@ -77,24 +81,26 @@ class FMindex(object):
     def count(self, c):
         result = self.wave.count(c)
         if self.state == "DELETING":
-            if c > this.overwritten:
+            if c > self.overwritten:
                 result -= 1
         return self.wave.count(c)
 
     def insBase(self, i, c):
         self.ins_stageIb(i, c)
         self.ins_stageIIa(i)
-        self.ins_stageIIb(i)
+        self.stageIIb()
 
     def delBase(self, i):
-        self.del_stageIb(i)
+        #Delete performs the deletions 
+        #before finally doing a very variable-dependent
+        #overwrite
         self.del_stageIIa(i)
-        self.del_stageIIb(i)
+        self.stageIIb()
 
 
     def printBWT(self):
         print 'S', 'I', 'F', 'L'
-        for i in range(len(self.bwt)):
+        for i in range(self.getSize()):
             if i >= len(self.sa):
                 print " ", " ", sorted(self.bwt)[i], self.bwt[i]
             else:
@@ -142,12 +148,22 @@ class FMindex(object):
             if self.isa[x] >= k_prime:
                 self.isa[x] += 1
         self.isa.insert(i, k_prime)
+    
+    def _deleteSA(self, k_prime, i):
+        self.sa.remove(i)
+        for x in range(len(self.sa)):
+            if self.sa[x] > i:
+                self.sa[x] -= 1
+        self.isa.remove(k_prime)
+        for x in range(len(self.isa)):
+            if self.isa[x] > k_prime:
+                self.isa[x] -= 1
 
     def printRank(self):
         print '_|' + '|'.join(list(self.bwt))
         for letter in sorted(set(list(self.bwt))):
             result = []
-            for j in range(len(self.bwt)):
+            for j in range(self.getSize()):
                 result.extend([str(self.rank(letter, j) + 1)])
             print letter +'|'+ '|'.join(result)
 
@@ -201,8 +217,6 @@ class FMindex(object):
     '''Stage Ib. Given the insertion index i and the character to insert c,
        Insert c into the bwt at i, overwriting the character there'''
     def ins_stageIb(self, i, c):
-        self.lf_before = None
-        self.lf_after = None
 
         #the character to be inserted
         self.c = c
@@ -251,8 +265,8 @@ class FMindex(object):
         if self.lf_after <= self.pos_first_modif:
             self.pos_first_modif += 1
 
-
-    def ins_stageIIb(self, i):
+    
+    def stageIIb(self):
         self.state = "REORDERING"
         #store the letter currently in the lf_before slot (the new character)
         self.L_store = self.overwritten
@@ -266,6 +280,7 @@ class FMindex(object):
         expected = smaller + self.rank(self.L_store, self.lf_after)
         while self.lf_before != expected:
             #Store temporary values needed throughout the loop
+            print "before", self.lf_before
             self.L_store = self.bwt[self.lf_before]
             smaller = self.count(self.L_store)
             temp_lf_before = smaller + self.rank(self.L_store, self.lf_before) 
@@ -289,26 +304,32 @@ class FMindex(object):
 ####################################################################################
 
 
-    '''Stage Ib. Given the deletion index i, overwrite the character at Ti with Ti-1'''
-    def  del_stageIb(self, i):
+    '''Delete actually runs backwards, where Step IIa happens
+       followed by a final Step Ib substitution'''
+    def  del_stageIIa(self, i):
         old_n = self.getSize()
-
+        
         self.pos_first_modif = self._index(i)
-        self.overwritten = self.FindChar(self.pos_first_modif)
-        self.state = "DELETING"
 
-        self.lf_after = self.count(this.overwritten) + self.rank(self.overwritten, self.self.pos_first_modif)
-        current_letter = self.FindChar(self.lf_after)
+        self.overwritten = self.findChar(self.pos_first_modif)
+        self.state = "DELETING"
+        self.lf_after = self.count(self.overwritten) + self.rank(self.overwritten, self.pos_first_modif)
+        current_letter = self.findChar(self.lf_after)
         rank = self.rank(current_letter, self.lf_after)
         self.delete(self.lf_after)
-        self.
-
+        self._deleteSA(i, self.lf_after)
+        self.lf_before = rank + self.count(current_letter)
+        backup = self.lf_before
+        self.lf_after = self.pos_first_modif
+        self.delete(self.lf_after)
+        new_letter_L = current_letter
+        self.insert(current_letter, self.lf_after)
+        self.lf_before = backup
+        
 
         
 
 
-    def del_stageIIa(self, i):
                 
 
 
-    def del_stageIIb(self, i, lf_k):
