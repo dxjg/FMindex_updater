@@ -11,8 +11,9 @@ class NaiveRankCount:
             else:
                 character_counts[character] += 1
         for character in alphabet:
-            count_table[character] = count_accumulation
-            count_accumulation += character_counts[character]
+            if character in character_counts.keys():
+                count_table[character] = count_accumulation
+                count_accumulation += character_counts[character]
         return count_table
 
     def __init__(self, sequence):
@@ -21,3 +22,9 @@ class NaiveRankCount:
         self._count_table = NaiveRankCount._create_count_table(self._alphabet, sequence)
         print self._count_table
 
+    def rank(self, character, index):
+        count = 0
+        for i in xrange(0, index+1):
+            if self._sequence[i] == character:
+                count += 1
+        return count
