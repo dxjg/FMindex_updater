@@ -8,10 +8,12 @@ import random
 import fmindex
 
 
+output = []
+n = '{: <'+str(len(str(sys.argv[1])))+'}'
 def main():
     #Genome from paper is: CTCTGC 
-    findLong(int(sys.argv[1]))
-    sys.exit(0) 
+  #  findLong(int(sys.argv[1]))
+   # sys.exit(0) 
     string = sys.argv[1]
     if '$' in string:
         print "Don't include $ in genome"
@@ -20,18 +22,17 @@ def main():
     
     fm = fmindex.createFM(string)
     if fm.getInverse() != string:
-        print "Not equal", string, fm.getInverse()
+        print "LF function does not correctly inverse BWT. Not equal", string, fm.getInverse()
         sys.exit(0)
     if len(sys.argv) == 4:
         fm = testIns(string, int(sys.argv[3]), sys.argv[2])
-#        fm = testDel(string, int(sys.argv[3]), sys.argv[2])
+        fm = testDel(string, int(sys.argv[3]), sys.argv[2])
     else:
         stressTest(string)
     
 def findLong(n):
     #random.seed()
     string = ''.join([random.choice('ACGT') for _ in xrange(n)])
-    print string
     stressTest(string)
     return 
 
@@ -39,20 +40,22 @@ def findLong(n):
 def stressTest(string): 
     numCorrect = 0
     numTotal = 0
-    for c in "ACGT":
-        for i in range(len(string) + 1):
+    for i in range(0, len(string) - 1):
+        for c in "ACGT":
             fm = fmindex.createFM(string)
-            print "\n===================================================="
 #            print "Testing i =", i, ", c =,", c
 #            print "Before: T =", string +'$ ', "BWT =", fm.bwt
-            afterString = string[:i] + c + string[i:]
+#            afterString = string[:i] + c + string[i:]
+            afterString = string[:i] + string[i+ 1]
             afterfm = fmindex.FMindex(afterString)
 #            print "After: T'= ", afterString + '$', "BWT'=", afterfm.bwt
             fm = testIns(string, i, c)
             if afterfm.bwt == fm.bwt:
                 numCorrect+=1
             numTotal+=1
-    print "Correct:", numCorrect, "Wrong:", numTotal - numCorrect
+    print '\n'.join(output)
+    print string
+    print  numCorrect,"PASS;",numTotal-numCorrect,"FAIL;","SCORE:",float(numCorrect)/float(numTotal)*100
 
             
     
@@ -63,12 +66,11 @@ def testIns(string, i, c):
     fm.insBase(i, c)
     afterString = string[:i] + c + string[i:]
     afterfm = fmindex.FMindex(afterString)
-    #fm = testDel(fm, i)
+    
     if afterfm.bwt == fm.bwt:
-        print "SUCCEEDED"
-        print fm.bwt
+        output.extend(["PASS: " + c + " " + n.format(str(i))])
     else:
-        print "FAILED"
+        output.extend(["FAIL: " + c + " " + n.format(str(i))])
     '''print "Correct result:", afterfm.bwt
     print "Actual results:", fm.bwt
     print " Actual | Correct"
