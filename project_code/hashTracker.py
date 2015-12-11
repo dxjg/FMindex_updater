@@ -170,8 +170,6 @@ class hashRangeTracker:
 	def __init__(self):
 		self.counts = [0 for _ in range(int(self.refLen/self.interval)+1)]
 		self.trackers = [hashTracker(self.interval) for _ in self.counts]
-		for t in self.trackers:
-			t.setRefLen(self.interval)
 
 
 	def addAlignment(self, read, alignment, alignmentPos):
