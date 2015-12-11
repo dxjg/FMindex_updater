@@ -324,3 +324,11 @@ class DynamicWaveletTree:
         if index < 0 or index >= self._head.get_size():
             return
         DynamicWaveletTree._delete(self._head, index)
+
+    def print_count_table(self):
+        print '   | count'
+        print ' $ | ' + str(self.count('$'))
+        print ' A | ' + str(self.count('A'))
+        print ' C | ' + str(self.count('C'))
+        print ' G | ' + str(self.count('G'))
+        print ' T | ' + str(self.count('T'))
