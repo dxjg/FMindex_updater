@@ -321,4 +321,6 @@ class DynamicWaveletTree:
 
     def delete(self, index):
         """ Deletes the character at @index. """
+        if index < 0 or index >= self._head.get_size():
+            return
         DynamicWaveletTree._delete(self._head, index)
