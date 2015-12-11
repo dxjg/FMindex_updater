@@ -1,6 +1,19 @@
+"""
+December 11, 2015
+Computational Genomics Final Project
+Ravi Gaddipati
+Craig Hennessy
+Gwen Hoffmann
+David Gong
+
+Read update tracking using a full array of genome length.
+The genome is split up into chunks of a user defined length,
+enabling updates up regions of a genome.
+"""
+
+
 import pprint
 pp = pprint.PrettyPrinter()
-
 
 
 class basicTracker:
@@ -37,9 +50,11 @@ class basicTracker:
 
 
 	def addAlignment(self, read, alignment, alignmentPos):
-		"""Adds an aligntment and increments the counts.
+		"""
+		Adds an aligntment and increments the counts.
 		Insertions are represented as deletions in the reference,
-		deletetions are represented as insertions in the reference"""
+		deletetions are represented as insertions in the reference
+		"""
 		for i,alignPos in enumerate(alignment):
 			idx = alignmentPos
 			for c in range(i):
@@ -77,7 +92,6 @@ class basicTracker:
 	
 
 	def getUpdateable(self):
-
 		"""
 		Return a list of tuples that give the positions
 		and change needed for all the positions that have an alternate

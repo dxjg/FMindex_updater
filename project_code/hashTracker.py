@@ -1,3 +1,20 @@
+"""
+December 11, 2015
+Computational Genomics Final Project
+Ravi Gaddipati
+Craig Hennessy
+Gwen Hoffmann
+David Gong
+
+Read update tracking using a full array of genome length.
+The genome is split up into chunks of a user defined length,
+enabling updates up regions of a genome.
+
+This only keeps track of visited nodes. Overall space usage is smaller,
+though if there is high coverage it will be the same/slightly worse than
+rangeTracker.
+"""
+
 import pprint
 pp = pprint.PrettyPrinter()
 
@@ -184,3 +201,4 @@ if __name__ == '__main__':
 			ret = rt.addAlignment(splitStr[1].strip(), list(splitStr[1].strip()), int(splitStr[0]))
 			if len(ret) > 0:
 				pp.pprint(ret)
+	print(h.heap())
