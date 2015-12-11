@@ -12,7 +12,7 @@ enabling updates up regions of a genome.
 """
 
 
-import pprint
+import pprint, timeit
 pp = pprint.PrettyPrinter()
 
 
@@ -63,11 +63,11 @@ class basicTracker:
 			if len(alignPos) == 1: # This is a sub or a match
 				if self.counts[idx]['BASE'] == None:
 					# Mark the correct base
-					self.counts[idx]['BASE'] = read[i]
+					self.counts[idx]['BASE'] = alignPos
 				# Increment the counters
 				if i == 0 or alignment[i - 1] != '':
 					# To prevent double counting w/dels
-					self.counts[idx][alignPos] += 1
+					self.counts[idx][read[i]] += 1
 			elif alignPos == '':
 				#deletion
 				if i == len(alignment) - 1 or alignment[i+1] != '':
@@ -173,7 +173,7 @@ class rangeTracker:
 		ret = []
 		idx = int(alignmentPos/self.interval)
 		self.counts[idx] += 1
-		self.trackers[idx].addAlignment(read, alignment, alignmentPos)
+		self.trackers[idx].addAlignment(read, alignment, int(alignmentPos))
 		if self.counts[idx] >= self.triggerPoint:
 			ret = self.trackers[idx].getUpdateable()
 			self.trackers[idx].reset()
@@ -184,11 +184,11 @@ class rangeTracker:
 if __name__ == '__main__':
 
 	rt = rangeTracker(160)
-	rt.setInterval(160)
 	rt.setTrigger(5)	
 	rt.setMinReads(2)
+	rt.setInterval(160)
 
-	with open('test_data/x.fa') as fi:
+	with open('../test_data/x.fa') as fi:
 		ref = fi.readline().strip()
 		mod = fi.readline().strip()
 		for align in fi:
