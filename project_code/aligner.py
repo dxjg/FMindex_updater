@@ -10,7 +10,7 @@ class Aligner(object):
 	def __init__(self, genome):
 		self.fm = fmindex.createFM(genome)
 
-	def _setTemplate(self, genome):
+	def setTemplate(self, genome):
 		self.fm = fmindex.createFM(genome) #also fm.count, fm.occ, fm.sa
 
 	def _recurse_query_fm(self, word, word_index, fm_index):
@@ -126,7 +126,7 @@ class Aligner(object):
 			n += 1 # if not found, add another edit
 		return -1, "X" * len(read)
 
-	def _align(self, read):
+	def align(self, read):
 		pos = self._query_fm(read) #check if read is in FM index
 		if pos > -1:
 			edits = self._edit_str(read, read)
