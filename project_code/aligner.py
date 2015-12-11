@@ -10,7 +10,7 @@ class Aligner(object):
 	def __init__(self, genome):
 		self.fm = fmindex.createFM(genome)
 
-	def _setTemplate(self, genome):
+	def setTemplate(self, genome):
 		self.fm = fmindex.createFM(genome) #also fm.count, fm.occ, fm.sa
 
 	def _recurse_query_fm(self, word, word_index, fm_index):
@@ -37,8 +37,8 @@ class Aligner(object):
 			exit()
 		ch = len(self.fm.bwt)
 		if char_ind < 3:
-			ch = self.fm.count[chars[char_ind + 1]]
-		fm_start =  self.fm.count[char] # start of char's character range
+			ch = self.fm.count(chars[char_ind + 1])
+		fm_start =  self.fm.count(char) # start of char's character range
 		fm_end = ch # end of character range
 		pos = -1
 		# check for match with all characters in range
@@ -53,19 +53,12 @@ class Aligner(object):
 	def _cost(self, xc, yc):
 		if xc == yc:
 			return 0 # match
-		if xc == '-' or yc == '-': 
-			return 1 # gap
-		minc, maxc = min(xc, yc), max(xc, yc)
-		if minc == 'A' and maxc == 'G': 
-			return 1 # transition
-		elif minc == 'C' and maxc == 'T':
-			return 1 # transition
-		return 1 # transversion
+		return 1 # substitution/deletion/insertion
 
 	def _globalAlignment(self, x, y, s):
-    	#Adapted from code provided in class. Calculate global alignment value 
-    	#of sequences x and y using dynamic programming.  Return global 
-	    #alignment value."""
+    	#Adapted from code provided in class and at http://bit.ly/CG_DP_Global. 
+    	#Calculates global alignment value of sequences x and y using dynamic 
+    	#programming.  Returns global alignment value.
 	    D = numpy.zeros((len(x)+1, len(y)+1), dtype=int)
 	    for j in range(1, len(y)+1):
 	        D[0, j] = D[0, j-1] + s('-', y[j-1])
@@ -133,7 +126,7 @@ class Aligner(object):
 			n += 1 # if not found, add another edit
 		return -1, "X" * len(read)
 
-	def _align(self, read):
+	def align(self, read):
 		pos = self._query_fm(read) #check if read is in FM index
 		if pos > -1:
 			edits = self._edit_str(read, read)
