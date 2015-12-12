@@ -29,10 +29,10 @@ def main():
 def stressTest(string): 
     numCorrect = 0
     numTotal = 0
-    for i in range(0, len(string) + 1):
+    for i in range(0, len(string) - 1):
         for c in "ACGT":
             fm = fmindex.createFM(string)
-            afterString = string[:i] + string[i+ 1]
+            afterString = string[:i] + string[:i+ 1]
             afterfm = fmindex.FMindex(afterString)
             fm = testDel(string, i, c)
             if afterfm.bwt == fm.bwt:

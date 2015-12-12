@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import dynamic_wavelet_tree
+import naive_rank_count
 
 def createFM(genome):
     return FMindex(genome)
@@ -9,7 +10,8 @@ class FMindex(object):
     def __init__(self, genome):
         genome += "$"
         self.bwt = self._createBWT(genome)
-        self.wave = dynamic_wavelet_tree.DynamicWaveletTree(self.bwt)
+        self.wave = naive_rank_count.NaiveRankCount(self.bwt)
+        #self.wave = dynamic_wavelet_tree.DynamicWaveletTree(self.bwt)
         self.sa, self.isa = self._createSA(genome)
         self.state = "IDLE"
         #length of the bwt. needed by aligner
@@ -276,7 +278,7 @@ class FMindex(object):
 
         #expected/computed index of T'[i-1] self.lf_before' in algorithm
         expected = smaller + self.rank(self.L_store, self.lf_after)
-        print "j=", self.lf_before, "j_prime=", expected
+#        print "j=", self.lf_before, "j_prime=", expected
         while self.lf_before != expected:
             #Store temporary values needed throughout the loop
             self.L_store = self.bwt[self.lf_before]
@@ -286,7 +288,7 @@ class FMindex(object):
             #Perform the round of LFs to progress to next while
             self.lf_after = expected
             self.lf_before = temp_lf_before
-    #        expected = smaller + self.rank(self.L_store, self.lf_after)
+            expected = smaller + self.rank(self.L_store, self.lf_after)
             expected = self._lf(self.lf_after)
         #end while
         self.state = "IDLE"
@@ -301,6 +303,7 @@ class FMindex(object):
     '''Delete actually runs backwards, where Step IIa happens
        followed by a final Step Ib substitution'''
     def  del_stageIIa(self, i):
+        self.lf_before = None 
         old_n = self.getSize()
         
         self.pos_first_modif = self._index(i)

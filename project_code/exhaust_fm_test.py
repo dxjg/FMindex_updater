@@ -28,7 +28,6 @@ def stressTest(string):
     numTotal = 0
     for i in range(0, len(string) + 1):
         for c in "ACGT":
-            print i, c 
             fm = fmindex.createFM(string)
             afterString = string[:i] + c + string[i:]
             afterfm = fmindex.FMindex(afterString)
@@ -36,8 +35,8 @@ def stressTest(string):
             if afterfm.bwt == fm.bwt:
                 numCorrect+=1
             numTotal+=1
-    print '\n'.join(output)
-    print string
+    #print '\n'.join(output)
+    #print string
     print  numCorrect,"PASS;",numTotal-numCorrect,"FAIL;","SCORE:",float(numCorrect)/float(numTotal)*100
 
             
