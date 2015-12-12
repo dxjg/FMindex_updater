@@ -94,9 +94,10 @@ class Aligner(object):
 	def _findNeighbor(self, wlist, read, word, position):
 		letters = ['A', 'C', 'G', 'T']
 		for x in letters:
-			word2 = word[0:position] + x + word[position + 1:] # create substitutions
-			if word2 not in wlist:
-				wlist.append(word2)
+			if x != word[position]:
+				word2 = word[0:position] + x + word[position + 1:] # create substitutions
+				if word2 not in wlist:
+					wlist.append(word2)
 
 			word3 = word[0:position] + word[position + 1:] # create deletions
 			if word3 not in wlist:
@@ -139,11 +140,11 @@ class Aligner(object):
 
 		return pos, edits
 
-	def _subBase(self, pos, char):
+	def subBase(self, pos, char):
 		fm._subBase(pos, char)
 
-	def _insBase(self, pos, char):
+	def insBase(self, pos, char):
 		fm._insBase(pos, char)
 
-	def _delBase(self, pos):
+	def delBase(self, pos):
 		fm._delBase(pos)
