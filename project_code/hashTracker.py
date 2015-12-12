@@ -45,6 +45,8 @@ class hashTracker:
 		self.confidence = confidence
 		self.counts = {}
 
+	def setConfidence(self, conf):
+		self.confidence = conf
 
 	def initToDict(self, di, pos):
 		if pos not in di:
@@ -74,7 +76,7 @@ class hashTracker:
 					self.counts[idx][read[i]] += 1
 			elif alignPos == '':
 				#deletion
-				if i == len(alignment) - 1 or alignment[i+1] != '':
+				if i != len(alignment) - 1 and alignment[i+1] != '':
 					inv = alignment[i+1]
 					curr = i
 					# Get the str that would need to be inserted into the ref
@@ -104,7 +106,6 @@ class hashTracker:
 		base that is more common, as constrained by the minReads and
 		confidence
 		"""
-
 		ret = []
 		for i,terval in self.counts.iteritems():
 			# Check number of reads that have happened
@@ -165,6 +166,26 @@ class hashRangeTracker:
 		""" Set the minimum number of reads before considering a change valid"""
 		for t in self.trackers:
 			t.setMinReads(num)
+
+
+
+	def flush(self):
+		"" "Flush the stored updates, i.e. ignore trigger threshold"
+		ret = []
+		for t in self.trackers:
+			ret += t.getUpdateable()
+			t.reset()
+
+		for c in self.counts:
+			c = 0
+
+		return ret
+
+
+	def setConfidence(self, conf):
+		""" Set the confidence level of the change to be made"""
+		for t in self.trackers:
+			t.setConfidence(conf)
 
 
 	def __init__(self):

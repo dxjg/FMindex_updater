@@ -1,3 +1,17 @@
+"""
+December 11, 2015
+Computational Genomics Final Project
+Ravi Gaddipati
+Craig Hennessy
+Gwen Hoffmann
+David Gong
+
+The Aligner class calls the functions to build the fm-index from a 
+genome string. Then, it aligns reads using the fm-index and returns
+the best alignment position, along with a list that encodes the 
+edits made to the read to achieve the alignment. 
+
+"""
 
 from fmindex import FMindex
 import fmindex
@@ -94,9 +108,10 @@ class Aligner(object):
 	def _findNeighbor(self, wlist, read, word, position):
 		letters = ['A', 'C', 'G', 'T']
 		for x in letters:
-			word2 = word[0:position] + x + word[position + 1:] # create substitutions
-			if word2 not in wlist:
-				wlist.append(word2)
+			if x != word[position]:
+				word2 = word[0:position] + x + word[position + 1:] # create substitutions
+				if word2 not in wlist:
+					wlist.append(word2)
 
 			word3 = word[0:position] + word[position + 1:] # create deletions
 			if word3 not in wlist:
@@ -139,11 +154,19 @@ class Aligner(object):
 
 		return pos, edits
 
-	def _subBase(self, pos, char):
-		fm._subBase(pos, char)
+	def subBase(self, pos, char):
+		pass
+		#self.fm.delBase(pos)
+		#self.fm.insBase(pos, char)
 
-	def _insBase(self, pos, char):
-		fm._insBase(pos, char)
 
-	def _delBase(self, pos, base):
-		fm._insBase(pos, char)
+	def insBase(self, pos, char):
+		pass
+		#self.fm.insBase(pos, char)
+
+	def delBase(self, pos):
+		pass
+		#self.fm.delBase(pos)
+
+	def getRef(self):
+		return self.fm.getInverse()
