@@ -85,6 +85,7 @@ for x in data:
 	string = str(x[0]) + "\t" + str(x[1]) + "\t" + str(x[2]) + "\t" + str(x[3]) + "\n" 
 	fh.write(string)
 '''
+'''
 data = []
 n = 100
 genome = ''.join([random.choice('ACGT') for _ in xrange(n)])
@@ -108,6 +109,7 @@ for x in data:
 	fh.write(string)
 
 '''
+'''
 data = []
 n = 300
 while n < 2000:
@@ -127,4 +129,5 @@ fh = open("test_aligner_data.txt", "w")
 fh.write("Test alignment with increasing genome size\n")
 for x in data:
 	string = str(x[0]) + "\t" + str(x[1]) + "\n" 
-	fh.write(string)'''
+	fh.write(string)
+'''
