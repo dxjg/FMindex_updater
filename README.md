@@ -30,4 +30,7 @@ python driver.py [reference] <reads> <Interval> <MinReads> <TriggerPoint> <confi
 
 reference is the template sequence and reads is a list of reads (one per line). Interval defines what size block to split the reference in for the purposes of alignment tracking. Minimum reads specifies the minimum number of reads before considering an index update. Trigger point specifies when a blocks changes should be dumped for update. Confidence is the minimum percentage that a change needs to appear before an update. E.g. if 100 reads are aligned and 50 have an alternate allele, the index will update if confidence is <50 but not for >50.
 
-A list of parameters above was used to see if there was any significant timing changes. Unfortunately we weren't able to find any trends. We will need to try larger datasets, which would be facilitated by a faster aligner.
+A list of parameters above was used to see if there was any significant timing changes. Unfortunately we weren't able to find any trends. We will need to try larger datasets, which would be facilitated by a faster aligner. As sample set of data can be obtained with:
+
+python driver.py ../test_data/testRef ../test_data/testReads_sub 5,10 1 2,3 50
+
