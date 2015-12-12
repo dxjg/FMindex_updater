@@ -3,6 +3,23 @@ import sys
 import dynamic_wavelet_tree
 import naive_rank_count
 
+#Created by Craig Hennessy
+ """
+  2 December 11, 2015
+  3 Computational Genomics Final Project
+  4 Ravi Gaddipati
+  5 Craig Hennessy
+  6 Gwen Hoffmann
+  7 David Gong
+  8
+  9 Takes in a genome and creates the BWT
+ 10 Responds to BWT updates as well as contains count/rank through Wavelet class
+ 11 
+ 12 Low functionality due to insane number of if cases for LF
+ 16 """
+
+
+
 def createFM(genome):
     return FMindex(genome)
 
@@ -36,6 +53,9 @@ class FMindex(object):
         return self.bwt[i]
 
     #Perform the standard LF mapping
+    #Many of the conditionals we collected are scattered within this method
+    #Eventually we ended up calculating most LFs manually, leaving this method
+    #purely for the alignment and inverseBWT
     def _lf(self, i):
         #if in the middle of editing, use the computed lf value
         #if the index happens to be lf_after, which is normally just ahead
@@ -69,7 +89,7 @@ class FMindex(object):
 
         return c + r
 
-    #Return the 1-based index of ranks
+    #Return the 1-based index of ranks, which is why there's a substraction of 1
     def rank(self, c, i):
         #The minus 1 seems to be necessary because the implemented
         #rank function is 1 limited. So the first occurance has value 1
@@ -78,6 +98,7 @@ class FMindex(object):
             result -= 1
         return result
 
+    #returns the count for a character
     def count(self, c):
         result = self.wave.count(c)
         if self.state == "DELETING":
@@ -97,6 +118,10 @@ class FMindex(object):
         self.del_stageIIa(i)
         self.stageIIb()
 
+    def subBase(self, i, c):
+        #Perform only the overwrite of 1b followed by reordering
+        self.sub_stageIIa(i)
+        self.stageIIb()
 
     def printBWT(self):
         print 'S', 'I', 'F', 'L'
@@ -303,20 +328,24 @@ class FMindex(object):
     '''Delete actually runs backwards, where Step IIa happens
        followed by a final Step Ib substitution'''
     def  del_stageIIa(self, i):
+        #Need to declare this first or else a later delete() method complains
         self.lf_before = None 
-        old_n = self.getSize()
-        
+         
         self.pos_first_modif = self._index(i)
 
         self.overwritten = self.findChar(self.pos_first_modif)
+        #allows for conditional modifications during deletion phase
         self.state = "DELETING"
+
+        #get character to overwrite, then precalculate the deletion
         self.lf_after = self.count(self.overwritten) + self.rank(self.overwritten, self.pos_first_modif)
         current_letter = self.findChar(self.lf_after)
         rank = self.rank(current_letter, self.lf_after)
+        
+        #Remove the row from L, wave, and the SA/ISA
         self.delete(self.lf_after)
         self._deleteSA(i, self.lf_after)
         self.lf_before = rank + self.count(current_letter)
-        backup = self.lf_before
         self.lf_after = self.pos_first_modif
         self.delete(self.lf_after)
         new_letter_L = current_letter
@@ -327,7 +356,7 @@ class FMindex(object):
 #Basically everything from ins_stageIb except that insertion mode isn't activated        
 def sub_stageIb(self, i):
         self.lf_before = None
-        self.lf_before = None
+        self.lf_after = None
         #the character to be inserted
         self.c = c
 
