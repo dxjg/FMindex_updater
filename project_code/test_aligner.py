@@ -1,3 +1,15 @@
+"""
+December 11, 2015
+Computational Genomics Final Project
+Ravi Gaddipati
+Craig Hennessy
+Gwen Hoffmann
+David Gong
+
+Tests for correct alignment of reads. Runs experiments to test change
+in alignment time as the length of reads, length of genome, and number
+of edits increases. 
+"""
 
 import sys
 from aligner import Aligner
@@ -65,7 +77,8 @@ a.insBase("A", 1)
 #assert pos == 0
 #print pos, edits
 
-'''
+
+# Test reads of increasing length with 1 insertion, genome length 500
 data = []
 n = 500
 genome = ''.join([random.choice('ACGT') for _ in xrange(n)])
@@ -87,8 +100,8 @@ fh.write("Test reads of increasing length with 1 insertion, genome length 500\n"
 for x in data:
 	string = str(x[0]) + "\t" + str(x[1]) + "\t" + str(x[2]) + "\t" + str(x[3]) + "\n" 
 	fh.write(string)
-'''
-'''
+
+# Test reads with increasing number of edits
 data = []
 n = 100
 genome = ''.join([random.choice('ACGT') for _ in xrange(n)])
@@ -111,8 +124,7 @@ for x in data:
 	string = str(x[0]) + "\t" + str(x[1]) + "\n" 
 	fh.write(string)
 
-'''
-'''
+# Test alignment with increasing genome size
 data = []
 n = 300
 while n < 2000:
@@ -133,4 +145,3 @@ fh.write("Test alignment with increasing genome size\n")
 for x in data:
 	string = str(x[0]) + "\t" + str(x[1]) + "\n" 
 	fh.write(string)
-'''

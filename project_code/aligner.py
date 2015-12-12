@@ -1,3 +1,17 @@
+"""
+December 11, 2015
+Computational Genomics Final Project
+Ravi Gaddipati
+Craig Hennessy
+Gwen Hoffmann
+David Gong
+
+The Aligner class calls the functions to build the fm-index from a 
+genome string. Then, it aligns reads using the fm-index and returns
+the best alignment position, along with a list that encodes the 
+edits made to the read to achieve the alignment. 
+
+"""
 
 from fmindex import FMindex
 import fmindex
