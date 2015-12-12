@@ -331,6 +331,7 @@ class DynamicWaveletTree:
         self.insert(character, index)
 
     def print_count_table(self):
+        """ Prints the count values of all characters in a table format. """
         print '   | count'
         print ' $ | ' + str(self.count('$'))
         print ' A | ' + str(self.count('A'))

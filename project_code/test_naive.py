@@ -13,3 +13,13 @@ for i in xrange(0, len(sequence)):
     print nrc.rank('G', i)
     print nrc.rank('T', i)
     print
+
+print nrc.count('$')
+print nrc.count('A')
+print nrc.count('C')
+print nrc.count('G')
+print nrc.count('T')
+
+nrc.print_sequence()
+nrc.insert('A', 3)
+nrc.print_sequence()
