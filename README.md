@@ -42,5 +42,8 @@ experiments to show the effects of increasing read length, genome length, and
 number of edits on alignment time. The data from the experiments outputs to 
 a file called test_aligner_data.txt.  
 
-
+The FM index can be tested with the "name"_fm_test.py methods.  
+The main test file, exhaust_fm_test.py accepts an integer on the command line returns the success and failure numbers. There are additional test files for singular insertion and deletion. 
+Those files accept either a single string on the command line, or a string, 
+a single characterto insert, and the index to insert
 
