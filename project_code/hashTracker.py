@@ -170,7 +170,7 @@ class hashRangeTracker:
 
 
 	def flush(self):
-		"" "Flush the stored updates, i.e. ignore trigger"
+		"" "Flush the stored updates, i.e. ignore trigger threshold"
 		ret = []
 		for t in self.trackers:
 			ret += t.getUpdateable()
@@ -183,6 +183,7 @@ class hashRangeTracker:
 
 
 	def setConfidence(self, conf):
+		""" Set the confidence level of the change to be made"""
 		for t in self.trackers:
 			t.setConfidence(conf)
 
