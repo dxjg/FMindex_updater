@@ -8,7 +8,7 @@ David Gong
 This program is an implementation of a self updating FM index.
 The main parts of the code are:
 
-fmindex.py : Implements the fmindex, and the 4 stage update alogrithm. Also updates the suffix array.
+fmindex.py : Implements the fmindex, and the 4 stage update algorithm. Also updates the suffix array.
 dynamic_wavelet_tree.py : Implements a dynamic rank/count data structure. Used by fmindex.py
 hashTracker.py : Tracks alignments and finds the changes that need to be made to the index.
 rangeTracker.py: A first implementation, not currently used.
