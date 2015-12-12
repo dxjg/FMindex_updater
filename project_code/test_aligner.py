@@ -54,6 +54,9 @@ string = "TCAGATGACG"
 a = Aligner(string)
 pos, edits = a.align("TCAGGACG")
 assert pos == 0
+
+a.insBase("A", 1)
+
 #print pos, edits
 
 #string = "TCAGATGACGTCAGATGACGTCAGATGACGTCAGATGACGTCAGGACGTCAGGACGTCAGATTACGTCAGATTACG"

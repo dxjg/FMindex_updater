@@ -141,14 +141,18 @@ class Aligner(object):
 		return pos, edits
 
 	def subBase(self, pos, char):
-		self.fm.delBase(pos)
-		self.fm.insBase(pos, char)
+		pass
+		#self.fm.delBase(pos)
+		#self.fm.insBase(pos, char)
+
 
 	def insBase(self, pos, char):
-		self.fm.insBase(pos, char)
+		pass
+		#self.fm.insBase(pos, char)
 
 	def delBase(self, pos):
-		self.fm.delBase(pos)
+		pass
+		#self.fm.delBase(pos)
 
 	def getRef(self):
 		return self.fm.getInverse()
