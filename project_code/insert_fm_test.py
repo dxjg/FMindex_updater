@@ -11,15 +11,10 @@ import fmindex
 output = []
 n = '{: <'+str(len(str(sys.argv[1])))+'}'
 def main():
-    #Genome from paper is: CTCTGC 
-  #  findLong(int(sys.argv[1]))
-   # sys.exit(0) 
     string = sys.argv[1]
     if '$' in string:
         print "Don't include $ in genome"
         sys.exit(0)
-    
-    
     fm = fmindex.createFM(string)
     if fm.getInverse() != string:
         print "LF function does not correctly inverse BWT. Not equal", string, fm.getInverse()
@@ -29,21 +24,12 @@ def main():
     else:
         stressTest(string)
     
-def findLong(n):
-    #random.seed()
-    string = ''.join([random.choice('ACGT') for _ in xrange(n)])
-    stressTest(string)
-    return 
-
-
 def stressTest(string): 
     numCorrect = 0
     numTotal = 0
     for i in range(0, len(string)):
         for c in "ACGT":
             fm = fmindex.createFM(string)
-#            print "Testing i =", i, ", c =,", c
-#            print "Before: T =", string +'$ ', "BWT =", fm.bwt
             afterString = string[:i] + c + string[i:]
             afterfm = fmindex.FMindex(afterString)
             fm = testIns(string, i, c)
@@ -61,30 +47,6 @@ def testIns(string, i, c):
     fm = fmindex.createFM(string)
     before = fm.bwt
     fm.insBase(i, c)
-    afterString = string[:i] + c + string[i:]
-    afterfm = fmindex.FMindex(afterString)
-    
-    if afterfm.bwt == fm.bwt:
-        output.extend(["PASS: " + c + " " + n.format(str(i))])
-    else:
-        output.extend(["FAIL: " + c + " " + n.format(str(i))])
-    '''print "Correct result:", afterfm.bwt
-    print "Actual results:", fm.bwt
-    print " Actual | Correct"
-    for j in range(len(afterfm.bwt)):
-        correctResults=' '.join([str(afterfm.sa[j]),str(afterfm.isa[j]), sorted(afterfm.bwt)[j], afterfm.bwt[j]])
-        if j >= len(fm.bwt):
-            actualResults = "         |"
-        else:
-            actualResults=' '.join([str(fm.sa[j]),str(fm.isa[j]),sorted(fm.bwt)[j],fm.bwt[j], "|"])
-        print actualResults, correctResults
-    '''
-    return fm
-
-def testDel(string, i, c):
-    fm = fmindex.createFM(string)
-    before = fm.bwt
-    fm.delBase(i)
     afterString = string[:i] + c + string[i:]
     afterfm = fmindex.FMindex(afterString)
     
