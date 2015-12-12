@@ -149,5 +149,5 @@ class Aligner(object):
 	def delBase(self, pos):
 		fm._delBase(pos)
 
-	def getRef():
+	def getRef(self):
 		return fm.getInverse()
