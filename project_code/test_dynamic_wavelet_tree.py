@@ -1,8 +1,12 @@
 from dynamic_wavelet_tree import *
 
-sequence = 'CGT$'
+sequence = 'GG'
 dwt = DynamicWaveletTree(sequence)
-
+dwt.insert('T', 2)
+print dwt.rank('T', 2)
+dwt.print_count_table()
+print dwt.select('T', 1)
+'''
 print 'Original sequence: ' + sequence
 print
 
@@ -52,3 +56,4 @@ print
 print 'Selects for T:'
 print dwt.select('T', 0)
 print dwt.select('T', 1)
+'''
