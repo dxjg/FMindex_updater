@@ -145,5 +145,5 @@ class Aligner(object):
 	def _insBase(self, pos, char):
 		fm._insBase(pos, char)
 
-	def _delBase(self, pos, base):
-		fm._insBase(pos, char)
+	def _delBase(self, pos):
+		fm._delBase(pos)
