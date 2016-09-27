@@ -1,9 +1,7 @@
-December 11, 2015
-Computational Genomics Final Project
-Ravi Gaddipati
-Craig Hennessy
-Gwen Hoffmann
-David Gong
+# Computational Genomics Final Project
+## December 11, 2015
+
+### Ravi Gaddipati, Craig Hennessy, Gwen Hoffmann, David Gong
 
 This program is an implementation of a self updating FM index.
 The main parts of the code are:
