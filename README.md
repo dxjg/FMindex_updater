@@ -45,3 +45,8 @@ The main test file, exhaust_fm_test.py accepts an integer on the command line re
 Those files accept either a single string on the command line, or a string, 
 a single characterto insert, and the index to insert
 
+# References
+
+[1] Gerlach, Wolfgang. "Dynamic FM-Index for a collection of texts with application to space-efficient construction of the compressed suffix array." Master's thesis, Universität Bielefeld, Germany (2007).
+
+[2] Chan, Ho-Leung, et al. "Compressed indexes for dynamic text collections." ACM Transactions on Algorithms (TALG) 3.2 (2007): 21.
