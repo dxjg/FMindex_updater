@@ -47,6 +47,8 @@ a single characterto insert, and the index to insert
 
 # References
 
-[1] Gerlach, Wolfgang. "Dynamic FM-Index for a collection of texts with application to space-efficient construction of the compressed suffix array." Master's thesis, Universität Bielefeld, Germany (2007).
+[1] Chan, Ho-Leung, et al. "Compressed indexes for dynamic text collections." ACM Transactions on Algorithms (TALG) 3.2 (2007): 21.
 
-[2] Chan, Ho-Leung, et al. "Compressed indexes for dynamic text collections." ACM Transactions on Algorithms (TALG) 3.2 (2007): 21.
+[2] Gerlach, Wolfgang. "Dynamic FM-Index for a collection of texts with application to space-efficient construction of the compressed suffix array." Master's thesis, Universität Bielefeld, Germany (2007).
+
+[3] Salson, Mikaël, et al. "Dynamic extended suffix arrays." Journal of Discrete Algorithms 8.2 (2010): 241-257.
